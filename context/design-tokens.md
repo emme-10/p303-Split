@@ -13,12 +13,22 @@ for big stats rather than plain body-text numbers.
 ## Core rule: color = workout type
 Applied consistently across every screen (Weekly Split, Calendar,
 Templates, Progress):
-- **Strength** → amber/orange (`#F5A623`)
-- **Cardio** → cyan/blue (`#4FC3F7`)
+- **Strength** → space blue-purple (`#6E9DE9`)
+- **Cardio** → glacier turquoise (`#7FE8E2`)
 - **Rest day** → neutral gray (`#5A5A5E`)
-- **Streak / milestone** → lime (`#D4FF4F`) — reserved for celebratory
-  moments only (e.g. a workout streak, a new PR), NOT a workout-type
-  color, so it doesn't get diluted
+- **Streak / milestone** → sage-green (`#D0ED93`) — reserved for
+  celebratory moments only (e.g. a workout streak, a new PR), NOT a
+  workout-type color, so it doesn't get diluted
+
+**Design note:** strength and cardio are both cool hues, ~40° apart on
+the color wheel — a more cohesive, premium feel than an earlier
+warm/cool draft, but a quieter at-a-glance distinction. They still read
+apart via saturation/lightness (strength is more saturated and
+violet-leaning; cardio is paler and more washed). Because the hue gap is
+narrower, **icon pairing is treated as required, not optional** — every
+strength/cardio tag carries both the color and a consistent icon, so the
+distinction holds under gym lighting or for anyone with blue-green color
+vision differences.
 
 ## Surfaces
 - Background: near-black charcoal (`#0B0B0D`), not pure OLED black —
