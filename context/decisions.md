@@ -22,8 +22,38 @@ Add a new entry each session, even a short one.
 - Repo scaffolding created: README, LICENSE, BRIEF.md, .claude/ and
   /context directories, base folder structure under src/
 
-## [next session] — Design tokens + data model
-- (fill in once style pass and data-model.md are done)
+## 2026-08-28 — Design tokens defined
+- Pulled visual direction from Oura, Ultrahuman, and a set of moodboard
+  references (dark athletic dashboards, dotted-matrix data viz, radial
+  gauges) — dark surfaces, restrained accent color, tabular numerals for
+  big stat readouts
+- Locked the core rule: color = workout type, consistently across every
+  screen (strength = amber, cardio = cyan, rest = neutral gray)
+- Reserved a separate lime accent for streaks/milestones specifically —
+  not a workout-type color, so it stays meaningful when it appears
+- Implemented as code in src/theme/ (colors.ts, typography.ts,
+  spacing.ts, index.ts); explanation lives in context/design-tokens.md
+- Deferred: icon set choice, exact font-loading mechanism — both to be
+  decided once first screen work starts
+
+## 2026-08-28 — Accent palette revised
+- Swapped initial amber/cyan (warm/cool) pairing for space blue-purple
+  (strength) + glacier turquoise (cardio) — more cohesive with the
+  Oura/Ultrahuman mood, but both cool hues (~40° apart), a quieter
+  at-a-glance split than warm/cool
+- Mitigated by treating icon pairing (not just color) as required for
+  every strength/cardio tag, and leaning on the saturation/lightness gap
+  between the two (strength more saturated/violet, cardio paler)
+- Streak accent shifted from neon lime to a softer sage-green, same hue
+  family, just less saturated — reads calmer, still clearly distinct
+  from both workout-type colors
+- `warning` decoupled from `strength` (previously intentionally aliased
+  since both were amber) — now has its own true amber, since strength is
+  no longer warm-colored and the collision risk is gone
+
+## [next session] — Data model
+- (fill in once data-model.md's JSON structure is implemented as real
+  seed data in src/data/)
 
 ## [next session] — First screens
 - (fill in once Weekly Split / Template Builder are underway)
