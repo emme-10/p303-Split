@@ -15,8 +15,13 @@
 
 export const typography = {
   fontFamily: {
-    ui: 'Inter', // labels, body text, nav
-    stat: 'Inter-Tabular', // big numeric readouts — fallback to monospace if not loaded
+    ui: {
+      regular: 'Inter_400Regular',
+      medium: 'Inter_500Medium',
+     semibold: 'Inter_600SemiBold',
+      bold: 'Inter_700Bold',
+    },
+    stat: 'Inter_700Bold', // big numeric readouts — fallback to monospace if not loaded
   },
 
   size: {

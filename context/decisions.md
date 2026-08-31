@@ -55,5 +55,13 @@ Add a new entry each session, even a short one.
 - (fill in once data-model.md's JSON structure is implemented as real
   seed data in src/data/)
 
-## [next session] — First screens
-- (fill in once Weekly Split / Template Builder are underway)
+## 2026-08-28 — Weekly Split and typography
+- Built the Weekly Split home screen with seven mock days, assigned template
+  names, explicit Rest states, and tappable day rows that currently log a
+  placeholder assignment action
+- Loaded Inter through expo-font and @expo-google-fonts/inter, with
+  weight-specific font-family tokens for regular, medium, semibold, and bold
+- Applied tabular numerals to the week number, summary counts, and day dates
+  using React Native's `fontVariant: ['tabular-nums']`
+- Raised the rest-day accent to `#A6A6AB` after checking contrast, bringing
+  the RECOVERY label and rest marker above WCAG AA against their dark surfaces

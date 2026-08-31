@@ -33,7 +33,7 @@ export const colors = {
   cardioMuted: '#11302C', // dark teal — background/chip fill
 
   // Rest day / neutral state
-  rest: '#5A5A5E',
+  rest: '#A6A6AB',
   restMuted: '#232326',
 
   // Milestone / streak — NOT a workout type, reserve for celebratory moments only
