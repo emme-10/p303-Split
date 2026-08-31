@@ -8,7 +8,7 @@ import {
 } from '@expo-google-fonts/inter';
 import { StyleSheet, View } from 'react-native';
 
-import WeeklySplitScreen from './src/screens/WeeklySplitScreen';
+import TemplateDetailsScreen from './src/screens/TemplateDetailsScreen';
 
 export default function App() {
   const [fontsLoaded] = useFonts({
@@ -24,7 +24,7 @@ export default function App() {
 
   return (
     <View style={styles.container}>
-      <WeeklySplitScreen />
+      <TemplateDetailsScreen />
       <StatusBar style="light" />
     </View>
   );

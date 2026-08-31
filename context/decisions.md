@@ -51,17 +51,22 @@ Add a new entry each session, even a short one.
   since both were amber) — now has its own true amber, since strength is
   no longer warm-colored and the collision risk is gone
 
-## [next session] — Data model
-- (fill in once data-model.md's JSON structure is implemented as real
-  seed data in src/data/)
+## 2026-08-28 — Template Builder scoping
+- Scoped Template Builder to 2 screens: Details (name, activity type,
+  muscle groups, notes) → Add Exercises (combobox picker from
+  exercises.json, conditional strength/cardio card fields)
+- Confirmed templates can mix strength + cardio exercises in one
+  template (e.g. a jog + a lifting block) — intentional, supports the
+  hybrid-athlete persona
+- Deferred: activity types beyond Strength/Cardio, anatomical
+  muscle-group figure — both logged in context/backlog.md rather than
+  built now
+- Added context/backlog.md as a new scaffolding doc to track deferred
+  ideas going forward, linked from .claude/context.md
+- Edit reuses the same 2-screen flow pre-filled; Delete requires a
+  confirmation dialog naming the template
 
-## 2026-08-28 — Weekly Split and typography
-- Built the Weekly Split home screen with seven mock days, assigned template
-  names, explicit Rest states, and tappable day rows that currently log a
-  placeholder assignment action
-- Loaded Inter through expo-font and @expo-google-fonts/inter, with
-  weight-specific font-family tokens for regular, medium, semibold, and bold
-- Applied tabular numerals to the week number, summary counts, and day dates
-  using React Native's `fontVariant: ['tabular-nums']`
-- Raised the rest-day accent to `#A6A6AB` after checking contrast, bringing
-  the RECOVERY label and rest marker above WCAG AA against their dark surfaces
+## [next session] — Screen 1 build
+
+## [next session] — First screens
+- (fill in once Weekly Split / Template Builder are underway)

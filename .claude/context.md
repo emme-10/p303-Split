@@ -11,6 +11,7 @@ athletes, built as a Protogen P303 case study.
 - Product intent, persona, and scope: [`/BRIEF.md`](../BRIEF.md)
 - Design tokens (color, type, spacing): [`/context/design-tokens.md`](../context/design-tokens.md)
 - Data shape: [`/context/data-model.md`](../context/data-model.md)
+- Deferred features / scope cuts: [`/context/backlog.md`](../context/backlog.md)
 - Running decision log: [`/context/decisions.md`](../context/decisions.md)
 
 Always check `BRIEF.md` before proposing new features or screens —
