@@ -1,0 +1,20 @@
+[
+  { "id": "barbell-bench-press", "name": "Barbell Bench Press", "category": "strength", "muscleGroups": ["chest", "triceps"], "unit": "sets_reps" },
+  { "id": "incline-dumbbell-press", "name": "Incline Dumbbell Press", "category": "strength", "muscleGroups": ["chest", "shoulders"], "unit": "sets_reps" },
+  { "id": "overhead-press", "name": "Overhead Press", "category": "strength", "muscleGroups": ["shoulders", "triceps"], "unit": "sets_reps" },
+  { "id": "lateral-raise", "name": "Lateral Raise", "category": "strength", "muscleGroups": ["shoulders"], "unit": "sets_reps" },
+  { "id": "pull-up", "name": "Pull-Up", "category": "strength", "muscleGroups": ["back", "biceps"], "unit": "sets_reps" },
+  { "id": "barbell-row", "name": "Barbell Row", "category": "strength", "muscleGroups": ["back", "biceps"], "unit": "sets_reps" },
+  { "id": "lat-pulldown", "name": "Lat Pulldown", "category": "strength", "muscleGroups": ["back", "biceps"], "unit": "sets_reps" },
+  { "id": "bicep-curl", "name": "Dumbbell Bicep Curl", "category": "strength", "muscleGroups": ["biceps"], "unit": "sets_reps" },
+  { "id": "back-squat", "name": "Back Squat", "category": "strength", "muscleGroups": ["quads", "glutes"], "unit": "sets_reps" },
+  { "id": "romanian-deadlift", "name": "Romanian Deadlift", "category": "strength", "muscleGroups": ["hamstrings", "glutes"], "unit": "sets_reps" },
+  { "id": "walking-lunge", "name": "Walking Lunge", "category": "strength", "muscleGroups": ["quads", "glutes"], "unit": "sets_reps" },
+  { "id": "plank", "name": "Plank", "category": "strength", "muscleGroups": ["core"], "unit": "sets_reps" },
+  { "id": "easy-run", "name": "Easy Run", "category": "cardio", "muscleGroups": ["quads", "calves"], "unit": "distance_time" },
+  { "id": "interval-run", "name": "Interval Run", "category": "cardio", "muscleGroups": ["quads", "calves"], "unit": "distance_time" },
+  { "id": "long-run", "name": "Long Run", "category": "cardio", "muscleGroups": ["quads", "calves"], "unit": "distance_time" },
+  { "id": "rowing-machine", "name": "Rowing Machine", "category": "cardio", "muscleGroups": ["back", "core"], "unit": "distance_time" },
+  { "id": "stationary-bike", "name": "Stationary Bike", "category": "cardio", "muscleGroups": ["quads", "glutes"], "unit": "distance_time" },
+  { "id": "treadmill-incline-walk", "name": "Treadmill Incline Walk", "category": "cardio", "muscleGroups": ["calves", "glutes"], "unit": "distance_time" }
+]

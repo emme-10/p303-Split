@@ -5,6 +5,17 @@ import { colors, radius, spacing, typography } from '../theme';
 
 type ActivityType = 'strength' | 'cardio';
 
+export type TemplateDetails = {
+  name: string;
+  activityType: ActivityType;
+  selectedMuscleGroups: string[];
+  notes: string;
+};
+
+type TemplateDetailsScreenProps = {
+  onNext: (details: TemplateDetails) => void;
+};
+
 const muscleGroups = ['Chest', 'Back', 'Shoulders', 'Biceps', 'Triceps', 'Core', 'Quads', 'Hamstrings', 'Glutes', 'Calves'];
 
 const activityStyles: Record<ActivityType, { accent: string; muted: string }> = {
@@ -12,7 +23,7 @@ const activityStyles: Record<ActivityType, { accent: string; muted: string }> = 
   cardio: { accent: colors.cardio, muted: colors.cardioMuted },
 };
 
-export default function TemplateDetailsScreen() {
+export default function TemplateDetailsScreen({ onNext }: TemplateDetailsScreenProps) {
   const [name, setName] = useState('');
   const [activityType, setActivityType] = useState<ActivityType>('strength');
   const [selectedMuscleGroups, setSelectedMuscleGroups] = useState<string[]>([]);
@@ -33,7 +44,7 @@ export default function TemplateDetailsScreen() {
       return;
     }
 
-    console.log('Template details complete:', { name, activityType, selectedMuscleGroups, notes });
+    onNext({ name: name.trim(), activityType, selectedMuscleGroups, notes });
   };
 
   return (
