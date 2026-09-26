@@ -35,9 +35,15 @@ function parseSnapshot(rawValue: string | null): AppSnapshot {
   const parsed: unknown = JSON.parse(rawValue);
   if (!parsed || typeof parsed !== 'object') return emptySnapshot();
   const stored = parsed as Partial<AppSnapshot>;
-  const weeklySplit = createEmptyWeeklySplit();
+  const weeklySplit: WeeklySplit = {};
+  const isLegacyEmptyDefault = stored.version === 1
+    && Array.isArray(stored.templates)
+    && stored.templates.length === 0
+    && Array.isArray(stored.workoutLogs)
+    && stored.workoutLogs.length === 0
+    && weekdays.every((day) => stored.weeklySplit?.[day] === 'rest');
 
-  if (stored.weeklySplit && typeof stored.weeklySplit === 'object') {
+  if (!isLegacyEmptyDefault && stored.weeklySplit && typeof stored.weeklySplit === 'object') {
     for (const day of weekdays) {
       const assignment = stored.weeklySplit[day];
       if (typeof assignment === 'string') weeklySplit[day] = assignment;

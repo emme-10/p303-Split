@@ -42,15 +42,17 @@ Reusable workout templates.
 Weekly schedule.
 ```
 {
-  monday: templateId | "rest",
-  tuesday: templateId | "rest",
-  wednesday: templateId | "rest",
-  thursday: templateId | "rest",
-  friday: templateId | "rest",
-  saturday: templateId | "rest",
-  sunday: templateId | "rest"
+  monday?: templateId | "rest",
+  tuesday?: templateId | "rest",
+  wednesday?: templateId | "rest",
+  thursday?: templateId | "rest",
+  friday?: templateId | "rest",
+  saturday?: templateId | "rest",
+  sunday?: templateId | "rest"
 }
 ```
+An omitted weekday means no plan has been set for that day; `"rest"` is an
+explicit planned rest day.
 
 ## Persisted app snapshot
 AsyncStorage stores one versioned JSON snapshot under `@splitlog/app-state/v1`.
@@ -87,6 +89,7 @@ Historical logged workouts (seeded with ~6-8 weeks of fake history).
       exerciseId: string
       completed: boolean
       setsCompleted?: { reps: number, weight: number }[]
+      setsLogged?: { reps?: number, weight?: number, completed: boolean }[]
       distance?: number
       time?: number
       timeOrPace?: string

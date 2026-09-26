@@ -7,6 +7,7 @@ import { weekdays, type SavedTemplate, type Weekday } from '../types/templates';
 
 type DayType = 'strength' | 'cardio' | 'rest';
 type WeeklySplitScreenProps = {
+  onOpenCalendar: () => void;
   onOpenTemplates: () => void;
   onStartWorkout: (template: SavedTemplate) => void;
   onStartFreeform: () => void;
@@ -23,7 +24,7 @@ const workoutStyles: Record<DayType, { accent: string; muted: string; icon: stri
   rest: { accent: colors.rest, muted: colors.restMuted, icon: '-' },
 };
 
-export default function WeeklySplitScreen({ onOpenTemplates, onStartWorkout, onStartFreeform }: WeeklySplitScreenProps) {
+export default function WeeklySplitScreen({ onOpenCalendar, onOpenTemplates, onStartWorkout, onStartFreeform }: WeeklySplitScreenProps) {
   const { templates, weeklySplit, assignTemplate } = useAppState();
   const [selectedDay, setSelectedDay] = useState<Weekday | null>(null);
   const today = new Date();
@@ -35,11 +36,11 @@ export default function WeeklySplitScreen({ onOpenTemplates, onStartWorkout, onS
     date.setDate(monday.getDate() + index);
     return { day, label: dayLabels[day], date: date.toLocaleDateString(undefined, { day: '2-digit' }) };
   });
-  const trainingDays = weekdays.filter((day) => weeklySplit[day] !== 'rest').length;
+  const trainingDays = weekdays.filter((day) => weeklySplit[day] !== undefined && weeklySplit[day] !== 'rest').length;
   const formatDate = (date: Date) => date.toLocaleDateString(undefined, { month: 'short', day: '2-digit' }).toUpperCase();
   const dateRange = `${formatDate(monday)} - ${formatDate(new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + 6))}, ${monday.getFullYear()}`;
   const getDayType = (templateId: string): DayType => templateId === 'rest' ? 'rest' : templates.find((template) => template.id === templateId)?.activityType ?? 'rest';
-  const todayAssignment = weeklySplit[todayWeekday];
+  const todayAssignment = weeklySplit[todayWeekday] ?? 'rest';
   const todayTemplate = todayAssignment === 'rest' ? undefined : templates.find((template) => template.id === todayAssignment);
   const todayType = getDayType(todayAssignment);
   const todayWorkoutStyle = workoutStyles[todayType];
@@ -57,6 +58,7 @@ export default function WeeklySplitScreen({ onOpenTemplates, onStartWorkout, onS
         </View>
         <Text style={styles.dateRange}>{dateRange}</Text>
         <Pressable accessibilityRole="button" onPress={onOpenTemplates} style={styles.libraryButton}><Text style={styles.libraryButtonText}>TEMPLATE LIBRARY <Text style={styles.libraryButtonArrow}>›</Text></Text></Pressable>
+        <Pressable accessibilityRole="button" onPress={onOpenCalendar} style={styles.calendarButton}><Text style={styles.calendarButtonText}>CALENDAR <Text style={styles.libraryButtonArrow}>›</Text></Text></Pressable>
         <View style={[styles.todayCard, { borderColor: todayWorkoutStyle.accent }]}>
           <Text style={styles.todayLabel}>{todayLabel}</Text>
           {todayTemplate ? (
@@ -94,7 +96,7 @@ export default function WeeklySplitScreen({ onOpenTemplates, onStartWorkout, onS
         </View>
         <View style={styles.dayList}>
           {weekDays.map((day) => {
-            const templateId = weeklySplit[day.day];
+            const templateId = weeklySplit[day.day] ?? 'rest';
             const template = templateId === 'rest' ? undefined : templates.find((item) => item.id === templateId);
             const type = getDayType(templateId);
             const workout = workoutStyles[type];
@@ -144,6 +146,7 @@ const styles = StyleSheet.create({
   header: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between' }, eyebrow: { color: colors.textSecondary, fontFamily: typography.fontFamily.ui.bold, fontSize: typography.size.xs, fontWeight: typography.weight.bold, letterSpacing: 1.6 }, title: { marginTop: spacing.xs, color: colors.textPrimary, fontFamily: typography.fontFamily.ui.bold, fontSize: typography.size['3xl'], fontWeight: typography.weight.bold },
   weekBadge: { alignItems: 'center', paddingHorizontal: spacing.md, paddingVertical: spacing.sm, borderRadius: radius.md, backgroundColor: colors.surfaceRaised }, weekBadgeLabel: { color: colors.textSecondary, fontFamily: typography.fontFamily.ui.bold, fontSize: typography.size.xs, fontWeight: typography.weight.bold, letterSpacing: 1 }, weekBadgeValue: { marginTop: spacing.xs, color: colors.strength, fontFamily: typography.fontFamily.stat, fontSize: typography.size.xl, fontWeight: typography.weight.bold, fontVariant: ['tabular-nums'] },
   dateRange: { marginTop: spacing.sm, color: colors.textSecondary, fontFamily: typography.fontFamily.ui.medium, fontSize: typography.size.sm, fontWeight: typography.weight.medium, letterSpacing: 0.8 }, libraryButton: { alignSelf: 'flex-start', minHeight: spacing.xl, justifyContent: 'center', marginTop: spacing.sm }, libraryButtonText: { color: colors.cardio, fontFamily: typography.fontFamily.ui.bold, fontSize: typography.size.xs, fontWeight: typography.weight.bold, letterSpacing: 1 }, libraryButtonArrow: { fontSize: typography.size.lg },
+  calendarButton: { alignSelf: 'flex-start', minHeight: spacing.xl, justifyContent: 'center' }, calendarButtonText: { color: colors.textSecondary, fontFamily: typography.fontFamily.ui.bold, fontSize: typography.size.xs, fontWeight: typography.weight.bold, letterSpacing: 1 },
   todayCard: { marginTop: spacing.md, padding: spacing.md, borderWidth: 1, borderRadius: radius.md, backgroundColor: colors.surface },
   todayLabel: { color: colors.textSecondary, fontFamily: typography.fontFamily.ui.bold, fontSize: typography.size.xs, fontWeight: typography.weight.bold, letterSpacing: 1.2 },
   todayWorkout: { flexDirection: 'row', alignItems: 'center', marginTop: spacing.md },

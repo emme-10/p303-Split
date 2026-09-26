@@ -100,3 +100,21 @@ Add a new entry each session, even a short one.
   an empty session; finishing requires at least one exercise
 - Added explicit `sessionType` and `sessionName` log fields so later screens
   can identify freeform sessions without inferring from a missing template ID
+
+## 2026-09-26 — Calendar month view
+- Added a read-only month grid that uses actual logged exercise categories
+  for past days and split assignments for today/future days
+- Distinguished logged strength/cardio/mixed sessions, planned sessions,
+  skipped planned sessions, explicit Rest, and unplanned empty days; marked
+  today and added read-only day details with a route back to Weekly Split
+- Made weekly split assignments optional per weekday so an omitted key means
+  untouched/unplanned while the explicit `rest` value remains a planned rest
+- Replaced separate date numbers and status dots with state-colored date
+  circles, split-color circles for mixed logs, dashed skipped rings, and a
+  separate translucent Today glow
+- Blended logged and Rest fills toward the background at 65% using a shared
+  color utility; base workout tokens remain unchanged and date contrast stays
+  legible against the softened fills
+- Calendar detects performed type from completed entries or workout values
+  actually recorded in unchecked sets/cardio fields, so partial saved sessions
+  no longer appear as Rest

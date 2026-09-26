@@ -40,6 +40,7 @@ export type WorkoutLog = {
     exerciseId: string;
     completed: boolean;
     setsCompleted?: Array<{ reps: number; weight: number }>;
+    setsLogged?: Array<{ reps?: number; weight?: number; completed: boolean }>;
     distance?: number;
     time?: number;
     timeOrPace?: string;
@@ -50,14 +51,6 @@ export type WorkoutLog = {
 export const weekdays = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] as const;
 export type Weekday = (typeof weekdays)[number];
 export type SplitAssignment = string | 'rest';
-export type WeeklySplit = Record<Weekday, SplitAssignment>;
+export type WeeklySplit = Partial<Record<Weekday, SplitAssignment>>;
 
-export const createEmptyWeeklySplit = (): WeeklySplit => ({
-  monday: 'rest',
-  tuesday: 'rest',
-  wednesday: 'rest',
-  thursday: 'rest',
-  friday: 'rest',
-  saturday: 'rest',
-  sunday: 'rest',
-});
+export const createEmptyWeeklySplit = (): WeeklySplit => ({});

@@ -175,7 +175,14 @@ export default function ActiveWorkoutScreen({ template, onCancel, onFinish }: Ac
         exerciseId: item.exercise.id,
         completed: item.exercise.category === 'strength' ? item.strengthSets.some((set) => set.completed) : item.completed,
         ...(item.exercise.category === 'strength'
-          ? { setsCompleted: item.strengthSets.filter((set) => set.completed).map((set) => ({ reps: numericValue(set.reps), weight: numericValue(set.weight) })) }
+          ? {
+              setsCompleted: item.strengthSets.filter((set) => set.completed).map((set) => ({ reps: numericValue(set.reps), weight: numericValue(set.weight) })),
+              setsLogged: item.strengthSets.map((set) => ({
+                completed: set.completed,
+                ...(optionalNumericValue(set.reps) !== undefined ? { reps: optionalNumericValue(set.reps) } : {}),
+                ...(optionalNumericValue(set.weight) !== undefined ? { weight: optionalNumericValue(set.weight) } : {}),
+              })),
+            }
           : { distance: numericValue(item.distance), time: timeInSeconds(item.timeOrPace), timeOrPace: item.timeOrPace }),
       })),
     };
@@ -359,6 +366,12 @@ function SummaryStat({ label, value }: { label: string; value: string }) {
 function numericValue(value: string) {
   const parsed = Number.parseFloat(value);
   return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function optionalNumericValue(value: string) {
+  if (value.trim() === '') return undefined;
+  const parsed = Number.parseFloat(value);
+  return Number.isFinite(parsed) ? parsed : undefined;
 }
 
 function timeInSeconds(value: string) {

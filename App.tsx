@@ -13,13 +13,14 @@ import { AppStateProvider, useAppState } from './src/context/AppStateContext';
 import AddExercisesScreen from './src/screens/AddExercisesScreen';
 import type { SavedTemplate, TemplateExercise } from './src/types/templates';
 import ActiveWorkoutScreen from './src/screens/ActiveWorkoutScreen';
+import CalendarScreen from './src/screens/CalendarScreen';
 import TemplateDetailsScreen from './src/screens/TemplateDetailsScreen';
 import type { TemplateDetails } from './src/types/templates';
 import TemplateLibraryScreen from './src/screens/TemplateLibraryScreen';
 import WeeklySplitScreen from './src/screens/WeeklySplitScreen';
 import { colors, spacing, typography } from './src/theme';
 
-type AppScreen = 'split' | 'library' | 'details' | 'exercises' | 'activeWorkout';
+type AppScreen = 'split' | 'calendar' | 'library' | 'details' | 'exercises' | 'activeWorkout';
 
 export default function App() {
   const [fontsLoaded] = useFonts({
@@ -86,7 +87,8 @@ function AppNavigation() {
 
   return (
     <View style={styles.container}>
-      {screen === 'split' && <WeeklySplitScreen onOpenTemplates={() => setScreen('library')} onStartWorkout={startTemplateWorkout} onStartFreeform={startFreeformWorkout} />}
+      {screen === 'split' && <WeeklySplitScreen onOpenCalendar={() => setScreen('calendar')} onOpenTemplates={() => setScreen('library')} onStartWorkout={startTemplateWorkout} onStartFreeform={startFreeformWorkout} />}
+      {screen === 'calendar' && <CalendarScreen onBack={() => setScreen('split')} onOpenWeeklySplit={() => setScreen('split')} />}
       {screen === 'library' && <TemplateLibraryScreen onAddTemplate={startNewTemplate} onEditTemplate={startEditingTemplate} onBack={() => setScreen('split')} />}
       {screen === 'details' && <TemplateDetailsScreen key={editingTemplateId ?? 'new'} initialDetails={templateDetails ?? undefined} isEditing={editingTemplateId !== null} onCancel={() => setScreen('library')} onNext={(details) => { setTemplateDetails(details); setScreen('exercises'); }} />}
       {screen === 'exercises' && templateDetails && <AddExercisesScreen details={templateDetails} initialExercises={templateExercises} onBack={() => setScreen('details')} onSave={saveTemplate} />}
