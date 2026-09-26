@@ -1,8 +1,9 @@
 # Data Model
 
-Seeded, local-only data — no backend, no real API. Lives in `src/data/`
-once implemented. This doc describes the intended shape; update it if the
-actual JSON structure diverges during build.
+Local-only data — no backend, no real API. The exercise catalog is seeded
+in `src/data/`; user-created templates and the weekly split are persisted
+with AsyncStorage. This doc describes the intended shapes; update it if the
+actual structures diverge during build.
 
 ## `exercises.json`
 List of exercises in the library.
@@ -22,14 +23,16 @@ Reusable workout templates.
 {
   id: string
   name: string                  // e.g. "Back & Bicep"
-  type: "strength" | "cardio"
+  activityType: "strength" | "cardio"
+  selectedMuscleGroups: string[]
+  notes: string
   exercises: [
     {
-      exerciseId: string
-      targetSets?: number
-      targetReps?: number
-      targetDistance?: number   // for cardio
-      order: number
+      exercise: Exercise
+      notes: string
+      strengthSets: { id: number, weight: string, reps: string }[]
+      distance: string
+      timeOrPace: string
     }
   ]
 }
@@ -41,7 +44,29 @@ Weekly schedule.
 {
   monday: templateId | "rest",
   tuesday: templateId | "rest",
+  wednesday: templateId | "rest",
+  thursday: templateId | "rest",
+  friday: templateId | "rest",
+  saturday: templateId | "rest",
+  sunday: templateId | "rest"
+}
+```
+
+## Persisted app snapshot
+AsyncStorage stores one versioned JSON snapshot under `@splitlog/app-state/v1`.
+The shared context hydrates it before showing screens and writes the snapshot
+when any collection changes. Workout logs are included in the same snapshot
+shape so Active Workout can use the existing persistence path.
+```
+{
+  version: 1,
+  templates: SavedTemplate[],
+  weeklySplit: {
+    monday: templateId | "rest",
+    tuesday: templateId | "rest",
   ...
+  },
+  workoutLogs: WorkoutLog[]
 }
 ```
 

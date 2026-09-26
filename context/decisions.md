@@ -66,7 +66,12 @@ Add a new entry each session, even a short one.
 - Edit reuses the same 2-screen flow pre-filled; Delete requires a
   confirmation dialog naming the template
 
-## [next session] — Screen 1 build
-
-## [next session] — First screens
-- (fill in once Weekly Split / Template Builder are underway)
+## 2026-09-26 — Shared state and persistence
+- Added `AppStateContext` as the shared owner for saved templates, the
+  weekday-to-template weekly split, and a reserved workout-log collection
+- Persisted those collections as one versioned AsyncStorage snapshot and
+  gated the app screens on initial hydration to avoid flashing empty state
+- Connected Weekly Split to saved templates, with a day picker for template
+  or Rest assignments; template deletion clears affected assignments
+- Made Weekly Split the home screen and added navigation to the Template
+  Library; verified a created template and Monday assignment survive reload

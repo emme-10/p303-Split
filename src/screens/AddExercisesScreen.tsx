@@ -7,17 +7,17 @@ import { Platform, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextIn
 
 import exercises from '../data/exercises.json';
 import { colors, radius, spacing, typography } from '../theme';
-import type { TemplateDetails } from './TemplateDetailsScreen';
+import type { Exercise, SavedTemplate, TemplateDetails, TemplateExercise, StrengthSet } from '../types/templates';
 
-type ActivityType = 'strength' | 'cardio';
-type Exercise = Omit<(typeof exercises)[number], 'category'> & { category: ActivityType };
-type StrengthSet = { id: number; weight: string; reps: string };
-type AddedExercise = { exercise: Exercise; notes: string; strengthSets: StrengthSet[]; distance: string; timeOrPace: string };
 const exerciseCatalog = exercises as Exercise[];
+
+export type { SavedTemplate, TemplateExercise } from '../types/templates';
 
 type AddExercisesScreenProps = {
   details: TemplateDetails;
   onBack: () => void;
+  onSave: (exercises: TemplateExercise[]) => void;
+  initialExercises?: TemplateExercise[];
 };
 
 const activityStyles = {
@@ -42,9 +42,9 @@ function SortableExerciseCard({ exerciseId, children }: SortableExerciseCardProp
   return <View ref={setNodeRef as unknown as Ref<View>} style={webStyle} {...webDragProps}>{children}</View>;
 }
 
-export default function AddExercisesScreen({ details, onBack }: AddExercisesScreenProps) {
+export default function AddExercisesScreen({ details, initialExercises = [], onBack, onSave }: AddExercisesScreenProps) {
   const [query, setQuery] = useState('');
-  const [addedExercises, setAddedExercises] = useState<AddedExercise[]>([]);
+  const [addedExercises, setAddedExercises] = useState<TemplateExercise[]>(initialExercises);
   const matches = exerciseCatalog.filter((exercise) => exercise.name.toLowerCase().includes(query.trim().toLowerCase()));
   const visibleMatches = query.trim().length > 0 ? matches.slice(0, 6) : [];
   const missingExercise = addedExercises.length === 0;
@@ -62,7 +62,7 @@ export default function AddExercisesScreen({ details, onBack }: AddExercisesScre
     setQuery('');
   };
 
-  const updateExercise = (exerciseId: string, update: Partial<AddedExercise>) => {
+  const updateExercise = (exerciseId: string, update: Partial<TemplateExercise>) => {
     setAddedExercises((current) => current.map((added) => added.exercise.id === exerciseId ? { ...added, ...update } : added));
   };
 
@@ -74,7 +74,7 @@ export default function AddExercisesScreen({ details, onBack }: AddExercisesScre
 
   const handleSave = () => {
     if (missingExercise) return;
-    console.log('Template ready to save:', { ...details, exercises: addedExercises });
+    onSave(addedExercises);
   };
 
   const reorderStrengthExercises = (activeId: string, overId: string) => {
@@ -92,7 +92,7 @@ export default function AddExercisesScreen({ details, onBack }: AddExercisesScre
     });
   };
 
-  const renderExerciseCard = (added: AddedExercise) => {
+  const renderExerciseCard = (added: TemplateExercise) => {
     const { exercise } = added;
     const activity = activityStyles[exercise.category];
     const isStrength = exercise.category === 'strength';

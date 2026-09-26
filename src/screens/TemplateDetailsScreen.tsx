@@ -2,17 +2,14 @@ import { useState } from 'react';
 import { Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { colors, radius, spacing, typography } from '../theme';
+import type { ActivityType, TemplateDetails } from '../types/templates';
 
-type ActivityType = 'strength' | 'cardio';
-
-export type TemplateDetails = {
-  name: string;
-  activityType: ActivityType;
-  selectedMuscleGroups: string[];
-  notes: string;
-};
+export type { TemplateDetails } from '../types/templates';
 
 type TemplateDetailsScreenProps = {
+  initialDetails?: TemplateDetails;
+  isEditing?: boolean;
+  onCancel: () => void;
   onNext: (details: TemplateDetails) => void;
 };
 
@@ -23,11 +20,11 @@ const activityStyles: Record<ActivityType, { accent: string; muted: string }> = 
   cardio: { accent: colors.cardio, muted: colors.cardioMuted },
 };
 
-export default function TemplateDetailsScreen({ onNext }: TemplateDetailsScreenProps) {
-  const [name, setName] = useState('');
-  const [activityType, setActivityType] = useState<ActivityType>('strength');
-  const [selectedMuscleGroups, setSelectedMuscleGroups] = useState<string[]>([]);
-  const [notes, setNotes] = useState('');
+export default function TemplateDetailsScreen({ initialDetails, isEditing = false, onCancel, onNext }: TemplateDetailsScreenProps) {
+  const [name, setName] = useState(initialDetails?.name ?? '');
+  const [activityType, setActivityType] = useState<ActivityType>(initialDetails?.activityType ?? 'strength');
+  const [selectedMuscleGroups, setSelectedMuscleGroups] = useState<string[]>(initialDetails?.selectedMuscleGroups ?? []);
+  const [notes, setNotes] = useState(initialDetails?.notes ?? '');
 
   const isNameMissing = name.trim().length === 0;
 
@@ -50,8 +47,9 @@ export default function TemplateDetailsScreen({ onNext }: TemplateDetailsScreenP
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+        <Pressable accessibilityRole="button" onPress={onCancel} style={styles.cancelButton}><Text style={styles.cancelButtonText}>‹ TEMPLATES</Text></Pressable>
         <View style={styles.header}>
-          <Text style={styles.eyebrow}>NEW TEMPLATE</Text>
+          <Text style={styles.eyebrow}>{isEditing ? 'EDIT TEMPLATE' : 'NEW TEMPLATE'}</Text>
           <Text style={styles.title}>Template details</Text>
           <Text style={styles.subtitle}>Set the basics before adding exercises.</Text>
         </View>
@@ -164,7 +162,7 @@ export default function TemplateDetailsScreen({ onNext }: TemplateDetailsScreenP
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: colors.background },
   content: { padding: spacing.lg, paddingBottom: spacing['2xl'] },
-  header: { marginTop: spacing.sm },
+  cancelButton: { alignSelf: 'flex-start', minHeight: spacing.lg, justifyContent: 'center' }, cancelButtonText: { color: colors.textSecondary, fontFamily: typography.fontFamily.ui.bold, fontSize: typography.size.xs, fontWeight: typography.weight.bold, letterSpacing: 1 }, header: { marginTop: spacing.sm },
   eyebrow: {
     color: colors.textSecondary,
     fontFamily: typography.fontFamily.ui.bold,

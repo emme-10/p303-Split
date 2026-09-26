@@ -7,14 +7,20 @@ import {
   Inter_600SemiBold,
   Inter_700Bold,
 } from '@expo-google-fonts/inter';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { StyleSheet, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 
+import { AppStateProvider, useAppState } from './src/context/AppStateContext';
 import AddExercisesScreen from './src/screens/AddExercisesScreen';
-import TemplateDetailsScreen, { type TemplateDetails } from './src/screens/TemplateDetailsScreen';
+import type { SavedTemplate, TemplateExercise } from './src/types/templates';
+import TemplateDetailsScreen from './src/screens/TemplateDetailsScreen';
+import type { TemplateDetails } from './src/types/templates';
+import TemplateLibraryScreen from './src/screens/TemplateLibraryScreen';
+import WeeklySplitScreen from './src/screens/WeeklySplitScreen';
+import { colors, spacing, typography } from './src/theme';
+
+type AppScreen = 'split' | 'library' | 'details' | 'exercises';
 
 export default function App() {
-  const [templateDetails, setTemplateDetails] = useState<TemplateDetails | null>(null);
   const [fontsLoaded] = useFonts({
     Inter_400Regular,
     Inter_500Medium,
@@ -26,13 +32,49 @@ export default function App() {
     return null;
   }
 
+  return <AppStateProvider><AppNavigation /></AppStateProvider>;
+}
+
+function AppNavigation() {
+  const { isHydrated, upsertTemplate } = useAppState();
+  const [screen, setScreen] = useState<AppScreen>('split');
+  const [templateDetails, setTemplateDetails] = useState<TemplateDetails | null>(null);
+  const [templateExercises, setTemplateExercises] = useState<TemplateExercise[]>([]);
+  const [editingTemplateId, setEditingTemplateId] = useState<string | null>(null);
+
+  if (!isHydrated) {
+    return <View style={styles.loading}><ActivityIndicator color={colors.strength} /><Text style={styles.loadingText}>Loading your SplitLog...</Text></View>;
+  }
+
+  const startNewTemplate = () => {
+    setTemplateDetails(null);
+    setTemplateExercises([]);
+    setEditingTemplateId(null);
+    setScreen('details');
+  };
+
+  const startEditingTemplate = (template: SavedTemplate) => {
+    setTemplateDetails(template);
+    setTemplateExercises(template.exercises);
+    setEditingTemplateId(template.id);
+    setScreen('details');
+  };
+
+  const saveTemplate = (exercises: TemplateExercise[]) => {
+    if (!templateDetails) return;
+    const savedTemplate: SavedTemplate = { ...templateDetails, exercises, id: editingTemplateId ?? String(Date.now()) };
+    upsertTemplate(savedTemplate);
+    setScreen('library');
+  };
+
   return (
-    <GestureHandlerRootView style={styles.container}>
-      <View style={styles.container}>
-        {templateDetails ? <AddExercisesScreen details={templateDetails} onBack={() => setTemplateDetails(null)} /> : <TemplateDetailsScreen onNext={setTemplateDetails} />}
-        <StatusBar style="light" />
-      </View>
-    </GestureHandlerRootView>
+    <View style={styles.container}>
+      {screen === 'split' && <WeeklySplitScreen onOpenTemplates={() => setScreen('library')} />}
+      {screen === 'library' && <TemplateLibraryScreen onAddTemplate={startNewTemplate} onEditTemplate={startEditingTemplate} onBack={() => setScreen('split')} />}
+      {screen === 'details' && <TemplateDetailsScreen key={editingTemplateId ?? 'new'} initialDetails={templateDetails ?? undefined} isEditing={editingTemplateId !== null} onCancel={() => setScreen('library')} onNext={(details) => { setTemplateDetails(details); setScreen('exercises'); }} />}
+      {screen === 'exercises' && templateDetails && <AddExercisesScreen details={templateDetails} initialExercises={templateExercises} onBack={() => setScreen('details')} onSave={saveTemplate} />}
+      <StatusBar style="light" />
+    </View>
   );
 }
 
@@ -41,4 +83,6 @@ const styles = StyleSheet.create({
     flex: 1,
     minHeight: 0,
   },
+  loading: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: spacing.md, backgroundColor: colors.background },
+  loadingText: { color: colors.textSecondary, fontFamily: typography.fontFamily.ui.medium, fontSize: typography.size.sm, fontWeight: typography.weight.medium },
 });
