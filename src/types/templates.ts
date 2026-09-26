@@ -33,6 +33,8 @@ export type WorkoutLog = {
   startedAt: string;
   completedAt: string;
   durationSeconds: number;
+  sessionType: 'template' | 'freeform';
+  sessionName: string;
   templateId?: string;
   entries: Array<{
     exerciseId: string;

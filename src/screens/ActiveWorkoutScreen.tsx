@@ -23,7 +23,7 @@ type SessionExercise = {
 type SortableExerciseRowProps = { item: SessionExercise };
 
 type ActiveWorkoutScreenProps = {
-  template: SavedTemplate;
+  template?: SavedTemplate;
   onCancel: () => void;
   onFinish: () => void;
 };
@@ -56,7 +56,7 @@ function SortableExerciseRow({ item }: SortableExerciseRowProps) {
 export default function ActiveWorkoutScreen({ template, onCancel, onFinish }: ActiveWorkoutScreenProps) {
   const { addWorkoutLog } = useAppState();
   const [startedAt] = useState(() => Date.now());
-  const [sessionExercises, setSessionExercises] = useState<SessionExercise[]>(() => template.exercises.map((item, index) => ({
+  const [sessionExercises, setSessionExercises] = useState<SessionExercise[]>(() => (template?.exercises ?? []).map((item, index) => ({
     sessionId: Date.now() + index,
     exercise: item.exercise,
     strengthSets: item.exercise.category === 'strength'
@@ -73,6 +73,7 @@ export default function ActiveWorkoutScreen({ template, onCancel, onFinish }: Ac
   const [reorderDraft, setReorderDraft] = useState<SessionExercise[]>([]);
   const [search, setSearch] = useState('');
   const [showSummary, setShowSummary] = useState(false);
+  const [finishError, setFinishError] = useState('');
 
   const elapsedSeconds = Math.max(0, Math.floor((Date.now() - startedAt) / 1000));
   const completedSets = sessionExercises.reduce((count, item) => count + item.strengthSets.filter((set) => set.completed).length, 0);
@@ -117,6 +118,7 @@ export default function ActiveWorkoutScreen({ template, onCancel, onFinish }: Ac
     });
     setShowAddExercisePicker(false);
     setSearch('');
+    setFinishError('');
   };
 
   const swapExercise = (replacement: Exercise) => {
@@ -166,7 +168,9 @@ export default function ActiveWorkoutScreen({ template, onCancel, onFinish }: Ac
       startedAt: new Date(startedAt).toISOString(),
       completedAt: new Date(completedAt).toISOString(),
       durationSeconds: Math.floor((completedAt - startedAt) / 1000),
-      templateId: template.id,
+      sessionType: template ? 'template' : 'freeform',
+      sessionName: template?.name ?? 'Freeform',
+      ...(template ? { templateId: template.id } : {}),
       entries: sessionExercises.map((item) => ({
         exerciseId: item.exercise.id,
         completed: item.exercise.category === 'strength' ? item.strengthSets.some((set) => set.completed) : item.completed,
@@ -179,13 +183,22 @@ export default function ActiveWorkoutScreen({ template, onCancel, onFinish }: Ac
     onFinish();
   };
 
+  const requestFinish = () => {
+    if (sessionExercises.length === 0) {
+      setFinishError('Add at least one exercise before finishing.');
+      return;
+    }
+    setFinishError('');
+    setShowSummary(true);
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.screen}>
         <View style={styles.header}>
           <Pressable accessibilityRole="button" onPress={onCancel} style={styles.backButton}><Text style={styles.backText}>‹ WEEKLY SPLIT</Text></Pressable>
           <Text style={styles.eyebrow}>ACTIVE WORKOUT</Text>
-          <Text style={styles.title}>{template.name}</Text>
+          <Text style={styles.title}>{template?.name ?? 'Freeform'}</Text>
           <Text style={styles.subtitle}>{sessionExercises.length} EXERCISES · IN PROGRESS</Text>
         </View>
 
@@ -253,7 +266,8 @@ export default function ActiveWorkoutScreen({ template, onCancel, onFinish }: Ac
         </ScrollView>
 
         <View style={styles.finishBar}>
-          <Pressable accessibilityRole="button" onPress={() => setShowSummary(true)} style={({ pressed }) => [styles.finishButton, pressed && styles.buttonPressed]}>
+          {finishError !== '' && <Text accessibilityRole="alert" style={styles.finishError}>{finishError}</Text>}
+          <Pressable accessibilityRole="button" onPress={requestFinish} style={({ pressed }) => [styles.finishButton, pressed && styles.buttonPressed]}>
             <Text style={styles.finishButtonText}>FINISH WORKOUT</Text>
           </Pressable>
         </View>
@@ -322,7 +336,7 @@ export default function ActiveWorkoutScreen({ template, onCancel, onFinish }: Ac
             <View style={styles.streakMark}><Text style={styles.streakMarkText}>✓</Text></View>
             <Text style={styles.summaryEyebrow}>SESSION SAVED</Text>
             <Text style={styles.dialogTitle}>Workout summary</Text>
-            <Text style={styles.summaryTemplate}>{template.name}</Text>
+            <Text style={styles.summaryTemplate}>{template?.name ?? 'Freeform'}</Text>
             <View style={styles.summaryStats}>
               <SummaryStat label="DURATION" value={formatDuration(elapsedSeconds)} />
               <SummaryStat label="EXERCISES" value={`${completedExercises}/${sessionExercises.length}`} />
@@ -378,7 +392,7 @@ const styles = StyleSheet.create({
   setHeader: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginTop: spacing.md }, columnLabel: { color: colors.textSecondary, fontFamily: typography.fontFamily.ui.bold, fontSize: typography.size.xs, fontWeight: typography.weight.bold, letterSpacing: 0.7 }, setColumn: { width: spacing.xl, textAlign: 'center' }, flexColumn: { flex: 1, minWidth: 0 }, checkColumn: { width: spacing.xl, textAlign: 'center' }, removeColumn: { width: spacing.lg }, setRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginTop: spacing.sm }, setIndex: { color: colors.textSecondary, fontFamily: typography.fontFamily.stat, fontSize: typography.size.base, fontWeight: typography.weight.bold, fontVariant: ['tabular-nums'] }, numberInput: { minHeight: spacing.xl, paddingHorizontal: spacing.sm, borderWidth: 1, borderColor: colors.border, borderRadius: radius.sm, backgroundColor: colors.surfaceRaised, color: colors.textPrimary, fontFamily: typography.fontFamily.stat, fontSize: typography.size.base, fontWeight: typography.weight.bold, fontVariant: ['tabular-nums'] }, checkButton: { width: spacing.xl, height: spacing.xl, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors.border, borderRadius: radius.sm, backgroundColor: colors.surfaceRaised }, checkButtonDone: { borderColor: colors.success, backgroundColor: colors.success }, checkGlyph: { color: colors.textSecondary, fontFamily: typography.fontFamily.ui.bold, fontSize: typography.size.base, fontWeight: typography.weight.bold }, checkGlyphDone: { color: colors.background }, deleteSetButton: { width: spacing.lg, height: spacing.xl, alignItems: 'center', justifyContent: 'center', borderRadius: radius.sm }, deleteSetButtonDisabled: { opacity: 0.35 }, deleteSetText: { color: colors.error, fontFamily: typography.fontFamily.ui.regular, fontSize: typography.size.xl, fontWeight: typography.weight.regular }, deleteSetTextDisabled: { color: colors.textDisabled },
   addSetButton: { alignSelf: 'flex-start', minHeight: spacing.xl, justifyContent: 'center', marginTop: spacing.xs }, addSetText: { fontFamily: typography.fontFamily.ui.bold, fontSize: typography.size.xs, fontWeight: typography.weight.bold, letterSpacing: 0.8 }, cardioFields: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.md }, cardioField: { flex: 1, gap: spacing.xs }, cardioInput: { minHeight: spacing.xl, minWidth: 0, paddingHorizontal: spacing.sm, borderWidth: 1, borderColor: colors.border, borderRadius: radius.sm, backgroundColor: colors.surfaceRaised, color: colors.textPrimary, fontFamily: typography.fontFamily.ui.medium, fontSize: typography.size.sm, fontWeight: typography.weight.medium }, completeCardioButton: { minHeight: spacing.xl, alignItems: 'center', justifyContent: 'center', marginTop: spacing.md, borderWidth: 1, borderColor: colors.border, borderRadius: radius.sm, backgroundColor: colors.surfaceRaised }, completeCardioButtonDone: { borderColor: colors.success, backgroundColor: colors.success }, completeCardioText: { color: colors.textSecondary, fontFamily: typography.fontFamily.ui.bold, fontSize: typography.size.xs, fontWeight: typography.weight.bold, letterSpacing: 0.8 }, completeCardioTextDone: { color: colors.background },
   reorderBackdrop: { flex: 1, justifyContent: 'flex-end', backgroundColor: colors.background }, reorderSheet: { maxHeight: '85%', paddingHorizontal: spacing.lg, paddingTop: spacing.sm, borderTopLeftRadius: radius.lg, borderTopRightRadius: radius.lg, backgroundColor: colors.surface }, reorderHeader: { minHeight: spacing['2xl'], flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }, reorderHeaderAction: { width: spacing['2xl'], minHeight: spacing.xl, justifyContent: 'center' }, reorderCancelText: { color: colors.textSecondary, fontFamily: typography.fontFamily.ui.medium, fontSize: typography.size.sm, fontWeight: typography.weight.medium }, reorderTitle: { flex: 1, textAlign: 'center', color: colors.textPrimary, fontFamily: typography.fontFamily.ui.semibold, fontSize: typography.size.base, fontWeight: typography.weight.semibold }, reorderSaveText: { textAlign: 'right', color: colors.strength, fontFamily: typography.fontFamily.ui.bold, fontSize: typography.size.sm, fontWeight: typography.weight.bold }, reorderNote: { marginTop: spacing.xs, marginBottom: spacing.sm, color: colors.textSecondary, fontFamily: typography.fontFamily.ui.regular, fontSize: typography.size.sm, fontStyle: 'italic', fontWeight: typography.weight.regular }, reorderList: { flexGrow: 0 }, nativeReorderActions: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs }, nativeMoveButton: { width: spacing.lg, height: spacing.lg, alignItems: 'center', justifyContent: 'center', borderRadius: radius.sm, backgroundColor: colors.surface }, nativeMoveText: { color: colors.textSecondary, fontFamily: typography.fontFamily.ui.bold, fontSize: typography.size.sm, fontWeight: typography.weight.bold }, sheetBottomSpace: { height: spacing.md },
-  finishBar: { paddingHorizontal: spacing.lg, paddingTop: spacing.sm, paddingBottom: spacing.md, borderTopWidth: 1, borderTopColor: colors.border, backgroundColor: colors.background }, finishButton: { minHeight: spacing['2xl'], alignItems: 'center', justifyContent: 'center', borderRadius: radius.md, backgroundColor: colors.strength }, finishButtonText: { color: colors.background, fontFamily: typography.fontFamily.ui.bold, fontSize: typography.size.base, fontWeight: typography.weight.bold, letterSpacing: 1 }, buttonPressed: { opacity: 0.78 },
+  finishBar: { paddingHorizontal: spacing.lg, paddingTop: spacing.sm, paddingBottom: spacing.md, borderTopWidth: 1, borderTopColor: colors.border, backgroundColor: colors.background }, finishError: { marginBottom: spacing.sm, color: colors.warning, fontFamily: typography.fontFamily.ui.medium, fontSize: typography.size.sm, fontWeight: typography.weight.medium }, finishButton: { minHeight: spacing['2xl'], alignItems: 'center', justifyContent: 'center', borderRadius: radius.md, backgroundColor: colors.strength }, finishButtonText: { color: colors.background, fontFamily: typography.fontFamily.ui.bold, fontSize: typography.size.base, fontWeight: typography.weight.bold, letterSpacing: 1 }, buttonPressed: { opacity: 0.78 },
   modalBackdrop: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: spacing.lg, backgroundColor: colors.background }, swapDialog: { width: '100%', maxWidth: 460, maxHeight: '85%', padding: spacing.md, borderRadius: radius.md, backgroundColor: colors.surfaceRaised }, dialogTitle: { color: colors.textPrimary, fontFamily: typography.fontFamily.ui.bold, fontSize: typography.size.xl, fontWeight: typography.weight.bold }, searchInput: { minHeight: spacing['2xl'], marginTop: spacing.md, paddingHorizontal: spacing.md, borderWidth: 1, borderColor: colors.border, borderRadius: radius.sm, backgroundColor: colors.surface, color: colors.textPrimary, fontFamily: typography.fontFamily.ui.medium, fontSize: typography.size.base, fontWeight: typography.weight.medium }, swapResults: { marginTop: spacing.sm }, swapResultRow: { minHeight: spacing['2xl'], flexDirection: 'row', alignItems: 'center', paddingHorizontal: spacing.sm, borderBottomWidth: 1, borderBottomColor: colors.border }, resultMark: { width: spacing.sm, height: spacing.sm, marginRight: spacing.sm, borderRadius: radius.full }, swapResultText: { flex: 1 }, swapResultName: { color: colors.textPrimary, fontFamily: typography.fontFamily.ui.medium, fontSize: typography.size.sm, fontWeight: typography.weight.medium }, chevron: { color: colors.textSecondary, fontFamily: typography.fontFamily.ui.regular, fontSize: typography.size.xl }, cancelButton: { minHeight: spacing['2xl'], alignItems: 'center', justifyContent: 'center', marginTop: spacing.md, borderRadius: radius.sm, backgroundColor: colors.surface }, cancelText: { color: colors.textPrimary, fontFamily: typography.fontFamily.ui.bold, fontSize: typography.size.sm, fontWeight: typography.weight.bold, letterSpacing: 1 },
   summaryDialog: { width: '100%', maxWidth: 420, alignItems: 'center', padding: spacing.lg, borderRadius: radius.md, backgroundColor: colors.surfaceRaised }, streakMark: { width: spacing['2xl'], height: spacing['2xl'], alignItems: 'center', justifyContent: 'center', borderRadius: radius.full, backgroundColor: colors.streak }, streakMarkText: { color: colors.background, fontFamily: typography.fontFamily.ui.bold, fontSize: typography.size.xl, fontWeight: typography.weight.bold }, summaryEyebrow: { marginTop: spacing.md, color: colors.streak, fontFamily: typography.fontFamily.ui.bold, fontSize: typography.size.xs, fontWeight: typography.weight.bold, letterSpacing: 1.2 }, summaryTemplate: { marginTop: spacing.xs, color: colors.textSecondary, fontFamily: typography.fontFamily.ui.medium, fontSize: typography.size.base, fontWeight: typography.weight.medium }, summaryStats: { width: '100%', flexDirection: 'row', justifyContent: 'space-between', marginTop: spacing.lg, paddingVertical: spacing.md, borderTopWidth: 1, borderBottomWidth: 1, borderColor: colors.border }, summaryStat: { flex: 1, alignItems: 'center' }, summaryStatValue: { color: colors.textPrimary, fontFamily: typography.fontFamily.stat, fontSize: typography.size.xl, fontWeight: typography.weight.bold, fontVariant: ['tabular-nums'] }, summaryStatLabel: { marginTop: spacing.xs, color: colors.textSecondary, fontFamily: typography.fontFamily.ui.bold, fontSize: typography.size.xs, fontWeight: typography.weight.bold, letterSpacing: 0.4 }, summaryNote: { marginTop: spacing.md, textAlign: 'center', color: colors.textSecondary, fontFamily: typography.fontFamily.ui.regular, fontSize: typography.size.sm, fontWeight: typography.weight.regular }, confirmFinishButton: { width: '100%', minHeight: spacing['2xl'], alignItems: 'center', justifyContent: 'center', marginTop: spacing.lg, borderRadius: radius.sm, backgroundColor: colors.streak }, confirmFinishText: { color: colors.background, fontFamily: typography.fontFamily.ui.bold, fontSize: typography.size.sm, fontWeight: typography.weight.bold, letterSpacing: 0.8 }, keepWorkingButton: { minHeight: spacing.xl, justifyContent: 'center', marginTop: spacing.xs }, keepWorkingText: { color: colors.textSecondary, fontFamily: typography.fontFamily.ui.medium, fontSize: typography.size.sm, fontWeight: typography.weight.medium },
 });

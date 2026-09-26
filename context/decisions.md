@@ -96,3 +96,7 @@ Add a new entry each session, even a short one.
 - Consolidated card Swap, Remove, and Reorder actions into a `...` menu;
   reordering uses a draft sheet so Cancel discards and Save applies only to
   the active session
+- Connected the Today-card freeform entry to the same workout screen with
+  an empty session; finishing requires at least one exercise
+- Added explicit `sessionType` and `sessionName` log fields so later screens
+  can identify freeform sessions without inferring from a missing template ID

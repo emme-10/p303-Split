@@ -79,7 +79,9 @@ Historical logged workouts (seeded with ~6-8 weeks of fake history).
   startedAt: string (ISO)
   completedAt: string (ISO)
   durationSeconds: number
-  templateId?: string           // omitted if freeform
+  sessionType: "template" | "freeform"
+  sessionName: string           // template name or "Freeform"
+  templateId?: string           // present only for template sessions
   entries: [
     {
       exerciseId: string

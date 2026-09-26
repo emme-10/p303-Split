@@ -9,6 +9,7 @@ type DayType = 'strength' | 'cardio' | 'rest';
 type WeeklySplitScreenProps = {
   onOpenTemplates: () => void;
   onStartWorkout: (template: SavedTemplate) => void;
+  onStartFreeform: () => void;
 };
 
 const dayLabels: Record<Weekday, string> = {
@@ -22,11 +23,9 @@ const workoutStyles: Record<DayType, { accent: string; muted: string; icon: stri
   rest: { accent: colors.rest, muted: colors.restMuted, icon: '-' },
 };
 
-export default function WeeklySplitScreen({ onOpenTemplates, onStartWorkout }: WeeklySplitScreenProps) {
+export default function WeeklySplitScreen({ onOpenTemplates, onStartWorkout, onStartFreeform }: WeeklySplitScreenProps) {
   const { templates, weeklySplit, assignTemplate } = useAppState();
   const [selectedDay, setSelectedDay] = useState<Weekday | null>(null);
-  const [showWorkoutPlaceholder, setShowWorkoutPlaceholder] = useState(false);
-  const [workoutTitle, setWorkoutTitle] = useState('');
   const today = new Date();
   const todayWeekday = weekdays[(today.getDay() + 6) % 7];
   const monday = new Date(today);
@@ -49,28 +48,6 @@ export default function WeeklySplitScreen({ onOpenTemplates, onStartWorkout }: W
     if (selectedDay) assignTemplate(selectedDay, assignment);
     setSelectedDay(null);
   };
-  const startWorkout = (title: string) => {
-    setWorkoutTitle(title);
-    setShowWorkoutPlaceholder(true);
-  };
-
-  if (showWorkoutPlaceholder) {
-    return (
-      <SafeAreaView style={styles.safeArea}>
-        <View style={styles.placeholderScreen}>
-          <Pressable accessibilityRole="button" onPress={() => setShowWorkoutPlaceholder(false)} style={styles.placeholderBack}>
-            <Text style={styles.placeholderBackText}>‹ WEEKLY SPLIT</Text>
-          </Pressable>
-          <View style={styles.placeholderContent}>
-            <Text style={styles.eyebrow}>ACTIVE WORKOUT</Text>
-            <Text style={styles.placeholderTitle}>Coming soon</Text>
-            <Text style={styles.placeholderSubtitle}>{workoutTitle}</Text>
-          </View>
-        </View>
-      </SafeAreaView>
-    );
-  }
-
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.content}>
@@ -103,7 +80,7 @@ export default function WeeklySplitScreen({ onOpenTemplates, onStartWorkout }: W
           ) : (
             <>
               <Text style={styles.todayRestTitle}>Rest day — recovery</Text>
-              <Pressable accessibilityRole="button" onPress={() => startWorkout('Freeform workout')} style={styles.freeformLink}>
+              <Pressable accessibilityRole="button" onPress={onStartFreeform} style={styles.freeformLink}>
                 <Text style={styles.freeformLinkText}>Start a freeform workout instead</Text>
                 <Text style={styles.freeformArrow}>›</Text>
               </Pressable>
@@ -189,10 +166,4 @@ const styles = StyleSheet.create({
   modalBackdrop: { flex: 1, justifyContent: 'center', padding: spacing.lg, backgroundColor: colors.background }, picker: { maxHeight: '85%', padding: spacing.lg, borderRadius: radius.md, backgroundColor: colors.surfaceRaised }, pickerTitle: { color: colors.textPrimary, fontFamily: typography.fontFamily.ui.bold, fontSize: typography.size.xl, fontWeight: typography.weight.bold }, pickerEmpty: { alignItems: 'center', paddingVertical: spacing.lg }, pickerEmptyText: { textAlign: 'center', color: colors.textSecondary, fontFamily: typography.fontFamily.ui.regular, fontSize: typography.size.base, fontWeight: typography.weight.regular }, createTemplateButton: { minHeight: spacing['2xl'], justifyContent: 'center', marginTop: spacing.md, paddingHorizontal: spacing.md, borderRadius: radius.sm, backgroundColor: colors.strength }, createTemplateText: { color: colors.background, fontFamily: typography.fontFamily.ui.bold, fontSize: typography.size.sm, fontWeight: typography.weight.bold, letterSpacing: 0.8 }, optionsList: { marginTop: spacing.md },
   optionRow: { minHeight: spacing['2xl'], flexDirection: 'row', alignItems: 'center', paddingVertical: spacing.sm, borderBottomWidth: 1, borderBottomColor: colors.border }, optionMark: { width: spacing.xl, height: spacing.xl, alignItems: 'center', justifyContent: 'center', marginRight: spacing.md, borderRadius: radius.full }, optionMarkText: { fontFamily: typography.fontFamily.ui.bold, fontSize: typography.size.lg, fontWeight: typography.weight.bold }, optionDetails: { flex: 1 }, optionName: { color: colors.textPrimary, fontFamily: typography.fontFamily.ui.semibold, fontSize: typography.size.base, fontWeight: typography.weight.semibold }, optionType: { marginTop: spacing.xs, fontFamily: typography.fontFamily.ui.bold, fontSize: typography.size.xs, fontWeight: typography.weight.bold, letterSpacing: 0.8 }, cancelButton: { minHeight: spacing['2xl'], alignItems: 'center', justifyContent: 'center', marginTop: spacing.md, borderRadius: radius.sm, backgroundColor: colors.surface }, cancelText: { color: colors.textPrimary, fontFamily: typography.fontFamily.ui.bold, fontSize: typography.size.sm, fontWeight: typography.weight.bold, letterSpacing: 1 },
   buttonPressed: { opacity: 0.78 },
-  placeholderScreen: { flex: 1, padding: spacing.lg },
-  placeholderBack: { alignSelf: 'flex-start', minHeight: spacing.xl, justifyContent: 'center' },
-  placeholderBackText: { color: colors.textSecondary, fontFamily: typography.fontFamily.ui.bold, fontSize: typography.size.xs, fontWeight: typography.weight.bold, letterSpacing: 1 },
-  placeholderContent: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  placeholderTitle: { marginTop: spacing.sm, color: colors.textPrimary, fontFamily: typography.fontFamily.ui.bold, fontSize: typography.size['3xl'], fontWeight: typography.weight.bold },
-  placeholderSubtitle: { marginTop: spacing.sm, color: colors.textSecondary, fontFamily: typography.fontFamily.ui.medium, fontSize: typography.size.base, fontWeight: typography.weight.medium },
 });
