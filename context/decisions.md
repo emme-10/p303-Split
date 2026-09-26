@@ -93,3 +93,6 @@ Add a new entry each session, even a short one.
   through AppStateContext; freeform workout entry remains deferred
 - Added session-only exercise insertion from the shared exercise catalog,
   guarded set deletion, and a visible completion-column checkmark header
+- Consolidated card Swap, Remove, and Reorder actions into a `...` menu;
+  reordering uses a draft sheet so Cancel discards and Save applies only to
+  the active session
