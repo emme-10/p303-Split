@@ -75,3 +75,11 @@ Add a new entry each session, even a short one.
   or Rest assignments; template deletion clears affected assignments
 - Made Weekly Split the home screen and added navigation to the Template
   Library; verified a created template and Monday assignment survive reload
+
+## 2026-09-26 — Weekly Split Today card
+- Added a dynamically dated Today card driven by the current weekday's
+  persisted assignment, with an activity-colored Start Workout CTA or a
+  quieter recovery/freeform state
+- Marked today's row in the weekly list with a subtle activity-colored
+  outline while preserving its assignment picker behavior
+- Routed both workout actions to a temporary Active Workout placeholder
