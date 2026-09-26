@@ -12,13 +12,14 @@ import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { AppStateProvider, useAppState } from './src/context/AppStateContext';
 import AddExercisesScreen from './src/screens/AddExercisesScreen';
 import type { SavedTemplate, TemplateExercise } from './src/types/templates';
+import ActiveWorkoutScreen from './src/screens/ActiveWorkoutScreen';
 import TemplateDetailsScreen from './src/screens/TemplateDetailsScreen';
 import type { TemplateDetails } from './src/types/templates';
 import TemplateLibraryScreen from './src/screens/TemplateLibraryScreen';
 import WeeklySplitScreen from './src/screens/WeeklySplitScreen';
 import { colors, spacing, typography } from './src/theme';
 
-type AppScreen = 'split' | 'library' | 'details' | 'exercises';
+type AppScreen = 'split' | 'library' | 'details' | 'exercises' | 'activeWorkout';
 
 export default function App() {
   const [fontsLoaded] = useFonts({
@@ -41,6 +42,7 @@ function AppNavigation() {
   const [templateDetails, setTemplateDetails] = useState<TemplateDetails | null>(null);
   const [templateExercises, setTemplateExercises] = useState<TemplateExercise[]>([]);
   const [editingTemplateId, setEditingTemplateId] = useState<string | null>(null);
+  const [activeTemplate, setActiveTemplate] = useState<SavedTemplate | null>(null);
 
   if (!isHydrated) {
     return <View style={styles.loading}><ActivityIndicator color={colors.strength} /><Text style={styles.loadingText}>Loading your SplitLog...</Text></View>;
@@ -67,12 +69,23 @@ function AppNavigation() {
     setScreen('library');
   };
 
+  const startTemplateWorkout = (template: SavedTemplate) => {
+    setActiveTemplate(template);
+    setScreen('activeWorkout');
+  };
+
+  const finishWorkout = () => {
+    setActiveTemplate(null);
+    setScreen('split');
+  };
+
   return (
     <View style={styles.container}>
-      {screen === 'split' && <WeeklySplitScreen onOpenTemplates={() => setScreen('library')} />}
+      {screen === 'split' && <WeeklySplitScreen onOpenTemplates={() => setScreen('library')} onStartWorkout={startTemplateWorkout} />}
       {screen === 'library' && <TemplateLibraryScreen onAddTemplate={startNewTemplate} onEditTemplate={startEditingTemplate} onBack={() => setScreen('split')} />}
       {screen === 'details' && <TemplateDetailsScreen key={editingTemplateId ?? 'new'} initialDetails={templateDetails ?? undefined} isEditing={editingTemplateId !== null} onCancel={() => setScreen('library')} onNext={(details) => { setTemplateDetails(details); setScreen('exercises'); }} />}
       {screen === 'exercises' && templateDetails && <AddExercisesScreen details={templateDetails} initialExercises={templateExercises} onBack={() => setScreen('details')} onSave={saveTemplate} />}
+      {screen === 'activeWorkout' && activeTemplate && <ActiveWorkoutScreen template={activeTemplate} onCancel={() => { setActiveTemplate(null); setScreen('split'); }} onFinish={finishWorkout} />}
       <StatusBar style="light" />
     </View>
   );

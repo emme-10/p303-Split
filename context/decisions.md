@@ -83,3 +83,13 @@ Add a new entry each session, even a short one.
 - Marked today's row in the weekly list with a subtle activity-colored
   outline while preserving its assignment picker behavior
 - Routed both workout actions to a temporary Active Workout placeholder
+
+## 2026-09-26 — Template-driven Active Workout
+- Replaced the assigned-template Start Workout placeholder with a
+  scrollable session screen that preloads editable strength/cardio targets
+- Added per-set and per-cardio completion, extra strength sets, and
+  session-only exercise swapping without modifying the source template
+- Added a partial-completion summary and persisted the completed session
+  through AppStateContext; freeform workout entry remains deferred
+- Added session-only exercise insertion from the shared exercise catalog,
+  guarded set deletion, and a visible completion-column checkmark header

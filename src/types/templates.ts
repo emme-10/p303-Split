@@ -30,12 +30,17 @@ export type SavedTemplate = TemplateDetails & { id: string; exercises: TemplateE
 export type WorkoutLog = {
   id: string;
   date: string;
+  startedAt: string;
+  completedAt: string;
+  durationSeconds: number;
   templateId?: string;
   entries: Array<{
     exerciseId: string;
+    completed: boolean;
     setsCompleted?: Array<{ reps: number; weight: number }>;
     distance?: number;
     time?: number;
+    timeOrPace?: string;
   }>;
   notes?: string;
 };

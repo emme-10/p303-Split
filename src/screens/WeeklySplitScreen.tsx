@@ -3,10 +3,13 @@ import { Modal, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } fr
 
 import { useAppState } from '../context/AppStateContext';
 import { colors, radius, spacing, typography } from '../theme';
-import { weekdays, type Weekday } from '../types/templates';
+import { weekdays, type SavedTemplate, type Weekday } from '../types/templates';
 
 type DayType = 'strength' | 'cardio' | 'rest';
-type WeeklySplitScreenProps = { onOpenTemplates: () => void };
+type WeeklySplitScreenProps = {
+  onOpenTemplates: () => void;
+  onStartWorkout: (template: SavedTemplate) => void;
+};
 
 const dayLabels: Record<Weekday, string> = {
   monday: 'MON', tuesday: 'TUE', wednesday: 'WED', thursday: 'THU',
@@ -19,7 +22,7 @@ const workoutStyles: Record<DayType, { accent: string; muted: string; icon: stri
   rest: { accent: colors.rest, muted: colors.restMuted, icon: '-' },
 };
 
-export default function WeeklySplitScreen({ onOpenTemplates }: WeeklySplitScreenProps) {
+export default function WeeklySplitScreen({ onOpenTemplates, onStartWorkout }: WeeklySplitScreenProps) {
   const { templates, weeklySplit, assignTemplate } = useAppState();
   const [selectedDay, setSelectedDay] = useState<Weekday | null>(null);
   const [showWorkoutPlaceholder, setShowWorkoutPlaceholder] = useState(false);
@@ -92,7 +95,7 @@ export default function WeeklySplitScreen({ onOpenTemplates }: WeeklySplitScreen
                   </View>
                 </View>
               </View>
-              <Pressable accessibilityRole="button" onPress={() => startWorkout(todayTemplate.name)} style={({ pressed }) => [styles.startWorkoutButton, { backgroundColor: todayWorkoutStyle.accent }, pressed && styles.buttonPressed]}>
+              <Pressable accessibilityRole="button" onPress={() => onStartWorkout(todayTemplate)} style={({ pressed }) => [styles.startWorkoutButton, { backgroundColor: todayWorkoutStyle.accent }, pressed && styles.buttonPressed]}>
                 <Text style={styles.startWorkoutText}>START WORKOUT</Text>
                 <Text style={styles.startWorkoutArrow}>›</Text>
               </Pressable>

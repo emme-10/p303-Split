@@ -76,13 +76,18 @@ Historical logged workouts (seeded with ~6-8 weeks of fake history).
 {
   id: string
   date: string (ISO)
+  startedAt: string (ISO)
+  completedAt: string (ISO)
+  durationSeconds: number
   templateId?: string           // omitted if freeform
   entries: [
     {
       exerciseId: string
+      completed: boolean
       setsCompleted?: { reps: number, weight: number }[]
       distance?: number
       time?: number
+      timeOrPace?: string
     }
   ]
   notes?: string
