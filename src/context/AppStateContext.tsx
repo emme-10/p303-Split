@@ -18,6 +18,7 @@ type AppStateContextValue = AppSnapshot & {
   deleteTemplate: (templateId: string) => void;
   assignTemplate: (day: Weekday, assignment: SplitAssignment) => void;
   addWorkoutLog: (log: WorkoutLog) => void;
+  replaceDemoWorkoutLogs: (logs: WorkoutLog[]) => void;
 };
 
 const emptySnapshot = (): AppSnapshot => ({
@@ -108,6 +109,10 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       weeklySplit: { ...current.weeklySplit, [day]: assignment },
     })),
     addWorkoutLog: (log) => setSnapshot((current) => ({ ...current, workoutLogs: [...current.workoutLogs, log] })),
+    replaceDemoWorkoutLogs: (logs) => setSnapshot((current) => ({
+      ...current,
+      workoutLogs: [...current.workoutLogs.filter((log) => log.source !== 'demo'), ...logs.map((log) => ({ ...log, source: 'demo' as const }))],
+    })),
   }), [isHydrated, snapshot]);
 
   return <AppStateContext.Provider value={value}>{children}</AppStateContext.Provider>;

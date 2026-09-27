@@ -5,16 +5,16 @@ import exercises from '../data/exercises.json';
 import { useAppState } from '../context/AppStateContext';
 import { colors, radius, spacing, typography } from '../theme';
 import { withOpacity } from '../utils/colors';
+import { classifyWorkoutDay, type WorkoutDayStatus } from '../utils/workoutDayStatus';
 import { weekdays, type ActivityType, type WorkoutLog, type Weekday } from '../types/templates';
 
-type DayStatus = 'logged' | 'planned' | 'skipped' | 'rest' | 'empty';
 type CalendarDay = {
   date: Date;
   dateKey: string;
   weekday: Weekday;
   inMonth: boolean;
   isToday: boolean;
-  status: DayStatus;
+  status: WorkoutDayStatus;
   logs: WorkoutLog[];
   loggedTypes: ActivityType[];
   plannedTemplateName?: string;
@@ -24,7 +24,6 @@ type CalendarDay = {
 type CalendarScreenProps = { onBack: () => void; onOpenWeeklySplit: () => void };
 
 const weekdayLabels = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
-const exerciseCategories = new Map(exercises.map((exercise) => [exercise.id, exercise.category as ActivityType]));
 const categoryColors: Record<ActivityType, string> = { strength: colors.strength, cardio: colors.cardio };
 const calendarFillAlpha = 0.65;
 const todayGlowColor = withAlpha(colors.strength, 0.38);
@@ -41,27 +40,6 @@ function localDateKey(date: Date) {
   return `${year}-${month}-${day}`;
 }
 
-function getWorkoutTypes(logs: WorkoutLog[]): ActivityType[] {
-  const types = new Set<ActivityType>();
-  for (const log of logs) {
-    for (const entry of log.entries) {
-      const category = exerciseCategories.get(entry.exerciseId);
-      if (!category) continue;
-
-      const hasRecordedStrength = entry.completed
-        || (entry.setsCompleted?.length ?? 0) > 0
-        || (entry.setsLogged?.some((set) => set.completed || set.reps !== undefined || set.weight !== undefined) ?? false);
-      const hasRecordedCardio = entry.completed
-        || (entry.distance ?? 0) > 0
-        || (entry.time ?? 0) > 0
-        || Boolean(entry.timeOrPace?.trim());
-
-      if (category === 'strength' ? hasRecordedStrength : hasRecordedCardio) types.add(category);
-    }
-  }
-  return [...types];
-}
-
 function getMonthCells(year: number, month: number, todayKey: string, firstDayKey: string, logsByDate: Map<string, WorkoutLog[]>, weeklySplit: Record<Weekday, string | undefined>, templateById: Map<string, { name: string; activityType: ActivityType }>): CalendarDay[] {
   const monthStart = new Date(year, month, 1);
   const mondayOffset = (monthStart.getDay() + 6) % 7;
@@ -75,15 +53,14 @@ function getMonthCells(year: number, month: number, todayKey: string, firstDayKe
     const logs = logsByDate.get(dateKey) ?? [];
     const assignment = weeklySplit[weekday];
     const assignedTemplate = assignment && assignment !== 'rest' ? templateById.get(assignment) : undefined;
-    const isPast = dateKey < firstDayKey;
-    const loggedTypes = getWorkoutTypes(logs);
-    let status: DayStatus = 'empty';
-
-    if (logs.length > 0) status = 'logged';
-    else if (!isPast && assignment === 'rest') status = 'rest';
-    else if (!isPast && assignedTemplate) status = 'planned';
-    else if (isPast && assignedTemplate) status = 'skipped';
-    else if (isPast && assignment === 'rest') status = 'rest';
+    const classification = classifyWorkoutDay({
+      dateKey,
+      todayKey: firstDayKey,
+      weekday,
+      assignment,
+      plannedType: assignedTemplate?.activityType,
+      logs,
+    });
 
     return {
       date,
@@ -91,9 +68,9 @@ function getMonthCells(year: number, month: number, todayKey: string, firstDayKe
       weekday,
       inMonth: date.getMonth() === month,
       isToday: dateKey === todayKey,
-      status,
+      status: classification.status,
       logs,
-      loggedTypes,
+      loggedTypes: classification.loggedTypes,
       plannedTemplateName: assignedTemplate?.name,
       plannedType: assignedTemplate?.activityType,
     };

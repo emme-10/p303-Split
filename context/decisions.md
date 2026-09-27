@@ -118,3 +118,20 @@ Add a new entry each session, even a short one.
 - Calendar detects performed type from completed entries or workout values
   actually recorded in unchecked sets/cardio fields, so partial saved sessions
   no longer appear as Rest
+
+## 2026-09-26 — Progress windows and charts
+- Use eight Monday-based weeks for muscle volume and running mileage, giving
+  twice the four-week chronic baseline for visible trend context
+- Keep streak and consistency separate at a rolling 14-day window; explicit
+  skipped planned days break the streak, while Rest and unplanned days do not
+- Reuse Calendar's shared workout-day classifier; count recorded strength
+  volume by exercise muscle groups and cardio mileage by logged distance
+- Added a clearly labeled temporary Progress demo-data seed control that
+  replaces only demo-tagged logs while preserving real workouts; remove or
+  gate this control before submission review
+- Kept mileage values and compact week ticks in responsive text rows outside
+  the SVG plot, with MILES / WEEK beside the vertical scale to prevent labels
+  from stretching or colliding on wide and mobile layouts
+- Seed fixture uses real exercise IDs, progressive strength loads, variable
+  weekly mileage, and intentional omissions on assigned plan days to exercise
+  Calendar skipped states and Progress consistency

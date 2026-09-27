@@ -29,6 +29,7 @@ export type SavedTemplate = TemplateDetails & { id: string; exercises: TemplateE
 
 export type WorkoutLog = {
   id: string;
+  source?: 'demo';
   date: string;
   startedAt: string;
   completedAt: string;
