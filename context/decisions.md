@@ -135,3 +135,39 @@ Add a new entry each session, even a short one.
 - Seed fixture uses real exercise IDs, progressive strength loads, variable
   weekly mileage, and intentional omissions on assigned plan days to exercise
   Calendar skipped states and Progress consistency
+
+## 2026-09-26 — Progress screen: time window grounded in training science
+- Researched how sports science approaches training-load time windows 
+  before picking an arbitrary number for Progress's charts
+- Landed on the Acute:Chronic Workload Ratio (ACWR) framework used in 
+  sports science for monitoring training load/injury risk: "acute" 
+  load = most recent 7 days, "chronic" load = rolling 28-day (4-week) 
+  baseline average. Widely used windowing convention, though the ratio 
+  itself has debate in the field about statistical validity — we're 
+  borrowing the windowing logic, not claiming clinical rigor
+- Decided: Progress's volume/mileage charts use an 8-week window — 
+  roughly 2x the chronic (4-week) baseline, giving enough history to 
+  show a trend emerging against that baseline, not just the baseline 
+  itself. This is a deliberate, cited design choice, not a round 
+  number picked arbitrarily
+- Streak/consistency uses a SHORTER window (7-14 days) than the volume 
+  charts — reasoning: consistency as a felt experience is about recent 
+  behavior, not an 8-week average; conflating the two windows would 
+  make the streak number lag behind what the user actually feels
+- Sources: scienceforsport.com/acutechronic-workload-ratio, 
+  frontiersin.org (Impellizzeri et al., ACWR research)
+
+## 2026-09-26 — Progress screen: sets/week replaces volume for muscle balance
+- Replaced "Volume per muscle group" (sum of weight × reps) with "Weekly
+  sets per muscle group" (avg sets logged per week over the same 8-week
+  window) — weight × reps is dominated by compound lower-body lifts moving
+  heavier absolute loads, not an actual measure of training balance across
+  muscle groups; sets/week is the standard, load-agnostic comparison metric
+- Overlaid a reference band for the commonly cited hypertrophy guideline of
+  10-20 sets/week per muscle group directly on each bar's track, using the
+  existing muted strength color rather than a new hue
+- Below-range values get reduced bar opacity as a secondary cue (no new
+  color introduced); within/above-range isn't visually distinguished further
+  to avoid over-designing a rarely-hit edge case
+- Kept the same horizontal bar layout/interaction from the volume version —
+  this was a data/meaning change, not a layout redesign

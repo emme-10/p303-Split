@@ -17,6 +17,9 @@ const exerciseById = new Map(exercises.map((exercise) => [exercise.id, exercise]
 const chartPlotHeight = spacing['2xl'] * 2 + spacing.md;
 const chartTop = spacing.md;
 const chartBottom = chartPlotHeight - spacing.md;
+// Evidence-based hypertrophy guideline, not a project-specific choice
+const setsGuidelineMin = 10;
+const setsGuidelineMax = 20;
 
 function localDateKey(date: Date) {
   const year = date.getFullYear();
@@ -40,18 +43,16 @@ function loggedDate(log: WorkoutLog) {
   return localDateKey(new Date(log.startedAt || log.date));
 }
 
-function volumeForEntry(log: WorkoutLog, exerciseId: string) {
+function setsForEntry(log: WorkoutLog, exerciseId: string) {
   const entry = log.entries.find((item) => item.exerciseId === exerciseId);
   if (!entry) return 0;
 
-  if (entry.setsLogged) {
-    return entry.setsLogged.reduce((sum, set) => sum + (set.weight ?? 0) * (set.reps ?? 0), 0);
-  }
-  return (entry.setsCompleted ?? []).reduce((sum, set) => sum + set.weight * set.reps, 0);
+  if (entry.setsCompleted) return entry.setsCompleted.length;
+  return entry.setsLogged?.filter((set) => set.completed).length ?? 0;
 }
 
-function formatVolume(value: number) {
-  return new Intl.NumberFormat(undefined, { maximumFractionDigits: 0 }).format(value);
+function formatSets(value: number) {
+  return Number.isInteger(value) ? String(value) : value.toFixed(1);
 }
 
 function formatWeek(date: Date) {
@@ -84,7 +85,7 @@ export default function ProgressScreen({ onBack }: ProgressScreenProps) {
     logsByDate.set(key, [...(logsByDate.get(key) ?? []), log]);
   }
 
-  const volumeByMuscle = new Map<string, number>();
+  const setsByMuscle = new Map<string, number>();
   const weeklyMileage: WeeklyMileage[] = [];
 
   for (let weekIndex = 0; weekIndex < 8; weekIndex += 1) {
@@ -108,9 +109,9 @@ export default function ProgressScreen({ onBack }: ProgressScreenProps) {
           miles += distance;
           if (distance > 0) sessions.push({ date: new Date(log.startedAt || log.date), exerciseName: exercise.name, distance });
         } else {
-          const volume = volumeForEntry(log, entry.exerciseId);
+          const sets = setsForEntry(log, entry.exerciseId);
           for (const group of exercise.muscleGroups) {
-            volumeByMuscle.set(group, (volumeByMuscle.get(group) ?? 0) + volume);
+            setsByMuscle.set(group, (setsByMuscle.get(group) ?? 0) + sets);
           }
         }
       }
@@ -119,12 +120,12 @@ export default function ProgressScreen({ onBack }: ProgressScreenProps) {
     weeklyMileage.push({ start: weekStart, label: formatWeek(weekStart), miles, sessions });
   }
 
-  const muscleVolumes = [...volumeByMuscle.entries()]
-    .map(([group, volume]) => ({ group, volume }))
-    .filter((item) => item.volume > 0)
-    .sort((a, b) => b.volume - a.volume)
+  const muscleSets = [...setsByMuscle.entries()]
+    .map(([group, totalSets]) => ({ group, avgSets: totalSets / 8 }))
+    .filter((item) => item.avgSets > 0)
+    .sort((a, b) => b.avgSets - a.avgSets)
     .slice(0, 8);
-  const maxVolume = Math.max(1, ...muscleVolumes.map((item) => item.volume));
+  const setsScaleMax = Math.max(setsGuidelineMax, ...muscleSets.map((item) => item.avgSets));
   const maxMiles = Math.max(1, ...weeklyMileage.map((item) => item.miles));
   const yAxisMax = Math.max(10, Math.ceil(maxMiles / 10) * 10);
   const yAxisTicks = Array.from({ length: yAxisMax / 10 + 1 }, (_, index) => yAxisMax - index * 10);
@@ -188,20 +189,29 @@ export default function ProgressScreen({ onBack }: ProgressScreenProps) {
         <View style={styles.screenHeader}><Text style={styles.eyebrow}>TRAINING TRENDS</Text><Text style={styles.title}>Progress</Text></View>
 
         <View style={styles.section}>
-          <View style={styles.sectionHeader}><Text style={styles.sectionTitle}>Volume per muscle group</Text><Text style={styles.windowLabel}>LAST 8 WEEKS</Text></View>
-          {muscleVolumes.length === 0 ? <Text style={styles.sectionEmpty}>No strength volume recorded in this window.</Text> : <View style={styles.volumeChart}>
-            {muscleVolumes.map((item) => <View key={item.group} style={styles.volumeRow}>
+          <View style={styles.sectionHeader}><Text style={styles.sectionTitle}>Weekly sets per muscle group</Text><Text style={styles.windowLabel}>LAST 8 WEEKS</Text></View>
+          {muscleSets.length === 0 ? <Text style={styles.sectionEmpty}>No strength sets recorded in this window.</Text> : <View style={styles.volumeChart}>
+            {muscleSets.map((item) => <View key={item.group} style={styles.volumeRow}>
               <Text style={styles.muscleLabel}>{capitalize(item.group)}</Text>
-              <View style={styles.volumeTrack}><View style={[styles.volumeFill, { width: `${(item.volume / maxVolume) * 100}%` }]} /></View>
-              <Text style={styles.volumeValue}>{formatVolume(item.volume)}</Text>
+              <View style={styles.volumeTrack}>
+                <View style={[styles.volumeGuidelineBand, {
+                  left: `${(setsGuidelineMin / setsScaleMax) * 100}%`,
+                  width: `${((setsGuidelineMax - setsGuidelineMin) / setsScaleMax) * 100}%`,
+                }]} />
+                <View style={[styles.volumeFill, {
+                  width: `${(item.avgSets / setsScaleMax) * 100}%`,
+                  opacity: item.avgSets < setsGuidelineMin ? 0.5 : 1,
+                }]} />
+              </View>
+              <Text style={styles.volumeValue}>{formatSets(item.avgSets)}</Text>
             </View>)}
-            <Text style={styles.chartFootnote}>TOTAL VOLUME · LB × REPS</Text>
+            <Text style={styles.chartFootnote}>AVG SETS / WEEK · Typical effective range: {setsGuidelineMin}-{setsGuidelineMax} sets/week</Text>
           </View>}
         </View>
 
         <View style={styles.section}>
           <View style={styles.sectionHeader}><Text style={styles.sectionTitle}>Weekly running mileage</Text><Text style={styles.windowLabel}>LAST 8 WEEKS</Text></View>
-          <View style={styles.chartAxisLabelRow}><Text style={styles.chartAxisLabel}>MILES / WEEK</Text><Text style={styles.chartScaleLabel}>{formatMileage(yAxisMax)} MAX</Text></View>
+          <View style={styles.chartAxisLabelRow}><Text style={styles.chartAxisLabel}>MILES / WEEK</Text></View>
           <View style={styles.chartPlotRow}>
             <View style={styles.chartYAxis}>
               {yAxisTicks.map((tick) => <Text key={tick} style={[styles.chartYAxisLabel, { top: mileageY(tick) - typography.size.xs / 2 }]}>{tick}</Text>)}
@@ -225,7 +235,6 @@ export default function ProgressScreen({ onBack }: ProgressScreenProps) {
           </View>
           <View style={styles.chartLabels}>
             {weeklyMileage.map((week) => <View key={week.label} style={styles.chartTick}>
-              <Text style={styles.chartValue}>{formatMileage(week.miles)}</Text>
               <Text style={styles.chartWeekLabel}>{week.label}</Text>
             </View>)}
           </View>
@@ -300,7 +309,8 @@ const styles = StyleSheet.create({
   volumeChart: { marginTop: spacing.md, gap: spacing.sm },
   volumeRow: { minHeight: spacing.xl, flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   muscleLabel: { width: spacing['2xl'] + spacing.lg, color: colors.textSecondary, fontFamily: typography.fontFamily.ui.medium, fontSize: typography.size.sm, fontWeight: typography.weight.medium },
-  volumeTrack: { flex: 1, height: spacing.sm, overflow: 'hidden', borderRadius: radius.full, backgroundColor: colors.surfaceRaised },
+  volumeTrack: { position: 'relative', flex: 1, height: spacing.sm, overflow: 'hidden', borderRadius: radius.full, backgroundColor: colors.surfaceRaised },
+  volumeGuidelineBand: { position: 'absolute', top: 0, bottom: 0, backgroundColor: colors.strengthMuted },
   volumeFill: { height: '100%', borderRadius: radius.full, backgroundColor: colors.strength },
   volumeValue: { width: spacing['2xl'], textAlign: 'right', color: colors.textPrimary, fontFamily: typography.fontFamily.stat, fontSize: typography.size.xs, fontWeight: typography.weight.bold, fontVariant: ['tabular-nums'] },
   chartAxisLabelRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: spacing.md, marginBottom: spacing.xs },
