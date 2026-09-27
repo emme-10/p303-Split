@@ -183,13 +183,15 @@ export default function CalendarScreen({ onBack, onOpenWeeklySplit }: CalendarSc
       <ScrollView contentContainerStyle={styles.content}>
         <Pressable accessibilityRole="button" onPress={onBack} style={styles.backButton}><Text style={styles.backText}>‹ WEEKLY SPLIT</Text></Pressable>
         <View style={styles.header}>
-          <View><Text style={styles.eyebrow}>TRAINING HISTORY</Text><Text style={styles.title}>Calendar</Text></View>
+          <Text style={styles.title}>Calendar</Text>
+        </View>
+        <View style={styles.monthRow}>
+          <Text style={styles.monthTitle}>{visibleMonth.toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}</Text>
           <View style={styles.monthControls}>
             <Pressable accessibilityRole="button" accessibilityLabel="Previous month" onPress={() => shiftMonth(-1)} style={styles.monthArrow}><Text style={styles.monthArrowText}>‹</Text></Pressable>
             <Pressable accessibilityRole="button" accessibilityLabel="Next month" onPress={() => shiftMonth(1)} style={styles.monthArrow}><Text style={styles.monthArrowText}>›</Text></Pressable>
           </View>
         </View>
-        <Text style={styles.monthTitle}>{visibleMonth.toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}</Text>
         <View style={styles.weekdayHeader}>{weekdayLabels.map((label) => <Text key={label} style={styles.weekdayLabel}>{label}</Text>)}</View>
         <View style={styles.calendarGrid}>
           {monthDays.map((day) => (
@@ -263,7 +265,8 @@ const styles = StyleSheet.create({
   monthControls: { flexDirection: 'row', gap: spacing.xs },
   monthArrow: { width: spacing.xl, height: spacing.xl, alignItems: 'center', justifyContent: 'center', borderRadius: radius.full, backgroundColor: colors.surfaceRaised },
   monthArrowText: { color: colors.textPrimary, fontFamily: typography.fontFamily.ui.medium, fontSize: typography.size.xl, fontWeight: typography.weight.medium },
-  monthTitle: { marginTop: spacing.lg, marginBottom: spacing.md, color: colors.textPrimary, fontFamily: typography.fontFamily.ui.semibold, fontSize: typography.size.xl, fontWeight: typography.weight.semibold },
+  monthRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: spacing.lg, marginBottom: spacing.md },
+  monthTitle: { color: colors.textPrimary, fontFamily: typography.fontFamily.ui.semibold, fontSize: typography.size.xl, fontWeight: typography.weight.semibold },
   weekdayHeader: { flexDirection: 'row', marginBottom: spacing.xs },
   weekdayLabel: { flex: 1, textAlign: 'center', color: colors.textSecondary, fontFamily: typography.fontFamily.ui.bold, fontSize: typography.size.xs, fontWeight: typography.weight.bold },
   calendarGrid: { flexDirection: 'row', flexWrap: 'wrap' },
