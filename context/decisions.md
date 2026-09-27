@@ -171,3 +171,123 @@ Add a new entry each session, even a short one.
   to avoid over-designing a rarely-hit edge case
 - Kept the same horizontal bar layout/interaction from the volume version —
   this was a data/meaning change, not a layout redesign
+
+  ## 2026-09-26 — Progress: volume-per-muscle-group replaced with sets/week
+- Reviewed the initial "Volume per muscle group" chart (total weight × 
+  reps summed per muscle group) and found it measures the wrong thing: 
+  compound lower-body lifts (squats, deadlifts) move far heavier 
+  absolute loads than isolation upper-body lifts, so the comparison 
+  was dominated by biomechanics, not actual training balance — a user 
+  could be well-balanced and still see wildly lopsided bars
+- Researched how training volume is actually measured for the "is my 
+  training balanced" question: sets-per-muscle-group-per-week is the 
+  standard, comparable metric (a set is a set regardless of load), with 
+  an evidence-based effective range of roughly 10-20 sets/week for 
+  hypertrophy across multiple reviews
+- Replaced the section with average weekly sets per muscle group 
+  (8-week average, smoothing week-to-week noise, consistent with the 
+  ACWR-informed windowing already used elsewhere on this screen), shown 
+  against that 10-20 set reference band
+- Considered, and deliberately scoped OUT: comparing a user's strength 
+  to population norms by age/weight (like strengthlevel.com's strength 
+  standards). This solves a different problem (how do I compare to 
+  others) than balance (am I neglecting a muscle group), and would 
+  require real normed population data to be credible — not something 
+  to fabricate with seed data. Logged as a separate backlog item.
+- Sources: BodySpec sets-per-week guide, Weightology's evidence-based 
+  set-volume review, Frontiers (Sports and Active Living) weekly 
+  strength-training volume quantification, Titan Forge Fitness
+
+## Strength-level percentile comparison (vs. population norms)
+**What:** Show a user how their strength compares to others of similar 
+age/bodyweight for a given lift — the pattern strengthlevel.com uses 
+(e.g. "your dumbbell curl is stronger than 65% of lifters your weight").
+
+**Why deferred:** This solves a genuinely different problem than the 
+"weekly sets per muscle group" balance view (see decisions.md, 
+2026-09-26 entry) — balance is about YOUR OWN training distribution; 
+this is about comparing yourself to a population. To be credible, it 
+needs real normed population data (age/bodyweight/gender-adjusted 
+percentiles per lift) — not something that can be faked convincingly 
+with invented seed data, and out of scope for a design case study 
+without a real dataset or API behind it (e.g. strengthlevel.com's own 
+data, if a usable API/dataset exists, or a similar source).
+
+**If picked up later:** would need either (a) a licensed/public dataset 
+of strength norms to source real percentile calculations, or (b) 
+partnering the feature with a disclosed "for illustration only, not 
+based on real population data" framing if built with placeholder 
+numbers — the second option risks looking unpolished/dishonest in a 
+portfolio piece, so (a) is strongly preferred if this is ever built.
+
+## 2026-09-27 — Checkpoint
+
+Core build is functionally complete — all 5 screens exist and work 
+end-to-end. Pausing here to work on the other capstone projects before 
+returning for polish + deploy. This entry is the punch list to pick 
+back up from.
+
+### What's built and working
+- Weekly Split (home) — Today card, weekly list, tap-to-assign
+- Template Builder + Template Library — create/edit/delete, combobox 
+  exercise picker, conditional strength/cardio fields
+- Active Workout — template-driven AND freeform, add/delete/swap/
+  reorder exercises, partial completion allowed, finish/summary flow
+- Calendar — day-state logic (logged/planned/skipped/rest), muted fill 
+  treatment, header/breadcrumb cleanup done
+- Progress — sets-per-week-per-muscle-group (evidence-grounded, see 
+  earlier entry), weekly mileage with Y-axis + tap-to-reveal detail, 
+  streak/consistency
+- Shared state (AppStateContext) + persistence via AsyncStorage/
+  localStorage — survives refresh
+- Design tokens (color, type, spacing) — defined, documented, revised 
+  once already
+
+### Punch list to finish before submission, in priority order
+1. **Add persistent bottom tab navigation** — currently relies on 
+   scattered breadcrumb links, which doesn't read as a real mobile app 
+   and risks the rubric's "confusing/hard to navigate" Redo criterion. 
+   Proposed 4 tabs: Split (home) / Calendar / Progress / Templates. 
+   Active Workout and Template Builder stay OFF the tab bar — they're 
+   flows entered FROM a tab, not destinations themselves. Once nav 
+   exists, remove the now-redundant "‹ Weekly Split" breadcrumb links 
+   on Calendar/Progress.
+2. **Remove the dev-only "Seed Demo Data" utility** 
+   (src/utils/demoProgressData.ts + its button on Progress) — was kept 
+   intentionally through the UI polish pass so screens could be 
+   evaluated with realistic data, but MUST come out before submission. 
+   A reviewer shouldn't be able to fabricate fake data in the demo. 
+   After removing, verify the Progress empty state still looks 
+   intentional for a zero-data user (don't let it have been quietly 
+   relying on seeded data to look right).
+3. **Empty states pass across all 5 screens** — BRIEF.md commits to 
+   handling these gracefully; each screen was built with SOME empty 
+   state handling inline, but worth a dedicated end-to-end check now 
+   that everything exists, rather than trusting each prompt caught it.
+4. **Full end-to-end flow test** — create a template → assign to 
+   Weekly Split → log a workout (both template AND freeform) → confirm 
+   correct in Calendar → confirm correct in Progress → refresh browser 
+   → confirm everything persisted. Haven't run one clean pass through 
+   the whole chain since Progress was added.
+5. **Deploy to Vercel + password-protect** — local `dist` export was 
+   tested weeks ago (`npx expo export -p web`, output dir `dist`, 
+   preset "Other" on Vercel) but never actually pushed live.
+6. **Backlog cleanup pass** — decide which open backlog items (Calendar 
+   legend restructure, rest-color/gradient/glassmorphism exploration, 
+   upper/lower-body sub-layer, strength-standards percentile 
+   comparison, AI template guidance, smart exercise substitution) are 
+   worth tackling vs. staying explicitly deferred. Either is fine — 
+   just make it a conscious call, not a time-runs-out default.
+7. **Final decisions.md wrap-up entry** — once everything above is 
+   settled, write a closing entry tying back to BRIEF.md's original 
+   plan so a reviewer can trace plan → build cleanly.
+8. **Grep the repo for client/company-specific info** before submitting 
+   — required by the program's own instructions.
+
+### Notes for picking this back up
+- The bottom-nav work (#1) is the biggest remaining lift — everything 
+  else is comparatively quick. Worth tackling it in its own fresh 
+  session/chat given its scope touches every screen's navigation.
+- If resuming in a NEW chat/session, point it at BRIEF.md, 
+  .claude/context.md, and this decisions.md entry specifically — it's 
+  a self-contained status snapshot.
