@@ -11,12 +11,13 @@ See [`BRIEF.md`](./BRIEF.md) for the full project brief, and
 
 ## What this is
 
-- A responsive, mobile-first web app (React Native + Expo, exported via
-  react-native-web) — not a native App Store / Play Store build
-- Built around a fictional persona and fictional/seeded data — no real
-  user accounts, no real client or company data
-- A design and product-thinking exercise first, an engineering exercise
-  second
+- A responsive, mobile-first web app (React Native + Expo, exported via react-native-web) — not a native App Store / Play Store build
+- Built around a fictional persona (no real client or company data).
+  There are no pre-loaded demo workouts or user accounts — the app
+  ships with a genuinely empty state, and all data shown is created
+  live by using the app (templates, weekly split, logged workouts).
+  The only static/seeded content is the exercise reference list.
+- A design and product-thinking exercise first, an engineering exercise second
 
 ## Stack
 
@@ -41,7 +42,7 @@ splitlog/
 │   │                        # Calendar, Progress
 │   ├── components/         # Shared UI components
 │   ├── navigation/          # Expo Router config
-│   ├── data/                # Seeded JSON (exercises, templates, split, logs)
+│   ├── data/                # Static exercise reference data; everything else is user-created and persisted locally.
 │   ├── theme/               # Design tokens as code
 │   ├── hooks/
 │   └── utils/
@@ -55,11 +56,13 @@ npm install
 npx expo start
 ```
 
-To run the web build (what gets deployed to Vercel):
+To build the static web export (what actually gets deployed to Vercel):
 
 ```bash
-npx expo start --web
+npx expo export -p web
 ```
+
+This outputs to `dist/`, which is what you deploy.
 
 ## Status
 
