@@ -8,10 +8,9 @@ import type { SavedTemplate } from '../types/templates';
 type TemplateLibraryScreenProps = {
   onAddTemplate: () => void;
   onEditTemplate: (template: SavedTemplate) => void;
-  onBack: () => void;
 };
 
-export default function TemplateLibraryScreen({ onAddTemplate, onEditTemplate, onBack }: TemplateLibraryScreenProps) {
+export default function TemplateLibraryScreen({ onAddTemplate, onEditTemplate }: TemplateLibraryScreenProps) {
   const { templates, deleteTemplate: removeTemplate } = useAppState();
   const [menuTemplateId, setMenuTemplateId] = useState<string | null>(null);
   const [deleteTemplate, setDeleteTemplate] = useState<SavedTemplate | null>(null);
@@ -27,7 +26,6 @@ export default function TemplateLibraryScreen({ onAddTemplate, onEditTemplate, o
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.header}>
           <View>
-            <Pressable accessibilityRole="button" onPress={onBack} style={styles.backButton}><Text style={styles.backButtonText}>‹ WEEKLY SPLIT</Text></Pressable>
             <Text style={styles.eyebrow}>TEMPLATE LIBRARY</Text>
             <Text style={styles.title}>Your templates</Text>
           </View>
@@ -95,7 +93,7 @@ export default function TemplateLibraryScreen({ onAddTemplate, onEditTemplate, o
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: colors.background }, content: { flexGrow: 1, padding: spacing.lg, paddingBottom: spacing['2xl'] },
-  header: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', marginTop: spacing.sm }, backButton: { minHeight: spacing.lg, justifyContent: 'center' }, backButtonText: { color: colors.textSecondary, fontFamily: typography.fontFamily.ui.bold, fontSize: typography.size.xs, fontWeight: typography.weight.bold, letterSpacing: 1 }, eyebrow: { color: colors.textSecondary, fontFamily: typography.fontFamily.ui.bold, fontSize: typography.size.xs, fontWeight: typography.weight.bold, letterSpacing: 1.6 }, title: { marginTop: spacing.xs, color: colors.textPrimary, fontFamily: typography.fontFamily.ui.bold, fontSize: typography.size['3xl'], fontWeight: typography.weight.bold },
+  header: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', marginTop: spacing.sm }, eyebrow: { color: colors.textSecondary, fontFamily: typography.fontFamily.ui.bold, fontSize: typography.size.xs, fontWeight: typography.weight.bold, letterSpacing: 1.6 }, title: { marginTop: spacing.xs, color: colors.textPrimary, fontFamily: typography.fontFamily.ui.bold, fontSize: typography.size['3xl'], fontWeight: typography.weight.bold },
   addButton: { width: spacing['2xl'], height: spacing['2xl'], alignItems: 'center', justifyContent: 'center', borderRadius: radius.full, backgroundColor: colors.strength }, addButtonText: { color: colors.background, fontFamily: typography.fontFamily.ui.regular, fontSize: typography.size['3xl'], fontWeight: typography.weight.regular, lineHeight: spacing['2xl'] },
   emptyState: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingVertical: spacing['2xl'] }, emptyTitle: { color: colors.textPrimary, fontFamily: typography.fontFamily.ui.bold, fontSize: typography.size.xl, fontWeight: typography.weight.bold }, emptyText: { maxWidth: 250, marginTop: spacing.sm, textAlign: 'center', color: colors.textSecondary, fontFamily: typography.fontFamily.ui.regular, fontSize: typography.size.base, fontWeight: typography.weight.regular }, emptyAction: { minHeight: spacing['2xl'], justifyContent: 'center', marginTop: spacing.xl, paddingHorizontal: spacing.lg, borderRadius: radius.md, backgroundColor: colors.strength }, emptyActionText: { color: colors.background, fontFamily: typography.fontFamily.ui.bold, fontSize: typography.size.sm, fontWeight: typography.weight.bold, letterSpacing: 1 },
   templateList: { marginTop: spacing.xl, gap: spacing.md }, templateCard: { padding: spacing.md, borderRadius: radius.md, backgroundColor: colors.surface }, cardHeader: { flexDirection: 'row', justifyContent: 'space-between' }, cardMain: { flex: 1, flexDirection: 'row', alignItems: 'center' }, typeMark: { width: spacing.xl, height: spacing.xl, alignItems: 'center', justifyContent: 'center', marginRight: spacing.md, borderRadius: radius.full }, typeMarkText: { fontFamily: typography.fontFamily.ui.bold, fontSize: typography.size.lg, fontWeight: typography.weight.bold }, cardDetails: { flex: 1 }, templateName: { color: colors.textPrimary, fontFamily: typography.fontFamily.ui.semibold, fontSize: typography.size.lg, fontWeight: typography.weight.semibold }, templateType: { marginTop: spacing.xs, fontFamily: typography.fontFamily.ui.bold, fontSize: typography.size.xs, fontWeight: typography.weight.bold, letterSpacing: 1 }, menuButton: { width: spacing.lg, height: spacing.lg, alignItems: 'center', justifyContent: 'center' }, menuButtonText: { color: colors.textSecondary, fontFamily: typography.fontFamily.ui.bold, fontSize: typography.size.lg, fontWeight: typography.weight.bold }, exerciseCount: { marginTop: spacing.md, color: colors.textSecondary, fontFamily: typography.fontFamily.ui.bold, fontSize: typography.size.xs, fontWeight: typography.weight.bold, letterSpacing: 0.8 }, menu: { marginTop: spacing.md, overflow: 'hidden', borderRadius: radius.sm, backgroundColor: colors.surfaceRaised }, menuItem: { minHeight: spacing['2xl'], justifyContent: 'center', paddingHorizontal: spacing.md }, menuItemText: { color: colors.textPrimary, fontFamily: typography.fontFamily.ui.medium, fontSize: typography.size.base, fontWeight: typography.weight.medium }, deleteMenuItemText: { color: colors.error, fontFamily: typography.fontFamily.ui.medium, fontSize: typography.size.base, fontWeight: typography.weight.medium },

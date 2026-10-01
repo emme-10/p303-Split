@@ -19,9 +19,10 @@ import TemplateDetailsScreen from './src/screens/TemplateDetailsScreen';
 import type { TemplateDetails } from './src/types/templates';
 import TemplateLibraryScreen from './src/screens/TemplateLibraryScreen';
 import WeeklySplitScreen from './src/screens/WeeklySplitScreen';
+import BottomTabBar, { type TabKey } from './src/navigation/BottomTabBar';
 import { colors, spacing, typography } from './src/theme';
 
-type AppScreen = 'split' | 'calendar' | 'progress' | 'library' | 'details' | 'exercises' | 'activeWorkout';
+type AppScreen = TabKey | 'details' | 'exercises' | 'activeWorkout';
 
 export default function App() {
   const [fontsLoaded] = useFonts({
@@ -86,15 +87,20 @@ function AppNavigation() {
     setScreen('split');
   };
 
+  const isTabScreen = screen === 'split' || screen === 'calendar' || screen === 'progress' || screen === 'library';
+
   return (
     <View style={styles.container}>
-      {screen === 'split' && <WeeklySplitScreen onOpenCalendar={() => setScreen('calendar')} onOpenProgress={() => setScreen('progress')} onOpenTemplates={() => setScreen('library')} onStartWorkout={startTemplateWorkout} onStartFreeform={startFreeformWorkout} />}
-      {screen === 'calendar' && <CalendarScreen onBack={() => setScreen('split')} onOpenWeeklySplit={() => setScreen('split')} />}
-      {screen === 'progress' && <ProgressScreen onBack={() => setScreen('split')} />}
-      {screen === 'library' && <TemplateLibraryScreen onAddTemplate={startNewTemplate} onEditTemplate={startEditingTemplate} onBack={() => setScreen('split')} />}
-      {screen === 'details' && <TemplateDetailsScreen key={editingTemplateId ?? 'new'} initialDetails={templateDetails ?? undefined} isEditing={editingTemplateId !== null} onCancel={() => setScreen('library')} onNext={(details) => { setTemplateDetails(details); setScreen('exercises'); }} />}
-      {screen === 'exercises' && templateDetails && <AddExercisesScreen details={templateDetails} initialExercises={templateExercises} onBack={() => setScreen('details')} onSave={saveTemplate} />}
-      {screen === 'activeWorkout' && <ActiveWorkoutScreen template={activeTemplate ?? undefined} onCancel={() => { setActiveTemplate(null); setScreen('split'); }} onFinish={finishWorkout} />}
+      <View style={styles.screenArea}>
+        {screen === 'split' && <WeeklySplitScreen onOpenCalendar={() => setScreen('calendar')} onOpenProgress={() => setScreen('progress')} onOpenTemplates={() => setScreen('library')} onStartWorkout={startTemplateWorkout} onStartFreeform={startFreeformWorkout} />}
+        {screen === 'calendar' && <CalendarScreen onOpenWeeklySplit={() => setScreen('split')} />}
+        {screen === 'progress' && <ProgressScreen onBack={() => setScreen('split')} />}
+        {screen === 'library' && <TemplateLibraryScreen onAddTemplate={startNewTemplate} onEditTemplate={startEditingTemplate} />}
+        {screen === 'details' && <TemplateDetailsScreen key={editingTemplateId ?? 'new'} initialDetails={templateDetails ?? undefined} isEditing={editingTemplateId !== null} onCancel={() => setScreen('library')} onNext={(details) => { setTemplateDetails(details); setScreen('exercises'); }} />}
+        {screen === 'exercises' && templateDetails && <AddExercisesScreen details={templateDetails} initialExercises={templateExercises} onBack={() => setScreen('details')} onSave={saveTemplate} />}
+        {screen === 'activeWorkout' && <ActiveWorkoutScreen template={activeTemplate ?? undefined} onCancel={() => { setActiveTemplate(null); setScreen('split'); }} onFinish={finishWorkout} />}
+      </View>
+      {isTabScreen && <BottomTabBar active={screen} onChange={setScreen} />}
       <StatusBar style="light" />
     </View>
   );
@@ -102,6 +108,10 @@ function AppNavigation() {
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+    minHeight: 0,
+  },
+  screenArea: {
     flex: 1,
     minHeight: 0,
   },

@@ -21,7 +21,7 @@ type CalendarDay = {
   plannedType?: ActivityType;
 };
 
-type CalendarScreenProps = { onBack: () => void; onOpenWeeklySplit: () => void };
+type CalendarScreenProps = { onOpenWeeklySplit: () => void };
 
 const weekdayLabels = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
 const categoryColors: Record<ActivityType, string> = { strength: colors.strength, cardio: colors.cardio };
@@ -81,7 +81,7 @@ function dayLabel(date: Date) {
   return date.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' });
 }
 
-export default function CalendarScreen({ onBack, onOpenWeeklySplit }: CalendarScreenProps) {
+export default function CalendarScreen({ onOpenWeeklySplit }: CalendarScreenProps) {
   const { templates, weeklySplit, workoutLogs } = useAppState();
   const [visibleMonth, setVisibleMonth] = useState(() => {
     const today = new Date();
@@ -158,7 +158,6 @@ export default function CalendarScreen({ onBack, onOpenWeeklySplit }: CalendarSc
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.content}>
-        <Pressable accessibilityRole="button" onPress={onBack} style={styles.backButton}><Text style={styles.backText}>‹ WEEKLY SPLIT</Text></Pressable>
         <View style={styles.header}>
           <Text style={styles.title}>Calendar</Text>
         </View>
@@ -234,8 +233,6 @@ function LegendMarker({ label, color, outlined = false, muted = false, filled = 
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: colors.background },
   content: { padding: spacing.lg, paddingBottom: spacing['2xl'] },
-  backButton: { alignSelf: 'flex-start', minHeight: spacing.lg, justifyContent: 'center' },
-  backText: { color: colors.textSecondary, fontFamily: typography.fontFamily.ui.bold, fontSize: typography.size.xs, fontWeight: typography.weight.bold, letterSpacing: 1 },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: spacing.sm },
   eyebrow: { color: colors.textSecondary, fontFamily: typography.fontFamily.ui.bold, fontSize: typography.size.xs, fontWeight: typography.weight.bold, letterSpacing: 1.4 },
   title: { marginTop: spacing.xs, color: colors.textPrimary, fontFamily: typography.fontFamily.ui.bold, fontSize: typography.size['3xl'], fontWeight: typography.weight.bold },

@@ -169,7 +169,6 @@ export default function ProgressScreen({ onBack }: ProgressScreenProps) {
     return (
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.emptyScreen}>
-          <Pressable accessibilityRole="button" onPress={onBack} style={styles.backButton}><Text style={styles.backText}>‹ WEEKLY SPLIT</Text></Pressable>
           <View style={styles.emptyContent}>
             <Text style={styles.eyebrow}>PROGRESS</Text>
             <Text style={styles.title}>Your training, over time</Text>
@@ -185,7 +184,6 @@ export default function ProgressScreen({ onBack }: ProgressScreenProps) {
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.content}>
-        <Pressable accessibilityRole="button" onPress={onBack} style={styles.backButton}><Text style={styles.backText}>‹ WEEKLY SPLIT</Text></Pressable>
         <View style={styles.screenHeader}><Text style={styles.eyebrow}>TRAINING TRENDS</Text><Text style={styles.title}>Progress</Text></View>
 
         <View style={styles.section}>
@@ -292,8 +290,6 @@ const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: colors.background },
   content: { padding: spacing.lg, paddingBottom: spacing['2xl'] },
   emptyScreen: { flex: 1, padding: spacing.lg },
-  backButton: { alignSelf: 'flex-start', minHeight: spacing.lg, justifyContent: 'center' },
-  backText: { color: colors.textSecondary, fontFamily: typography.fontFamily.ui.bold, fontSize: typography.size.xs, fontWeight: typography.weight.bold, letterSpacing: 1 },
   emptyContent: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   eyebrow: { color: colors.textSecondary, fontFamily: typography.fontFamily.ui.bold, fontSize: typography.size.xs, fontWeight: typography.weight.bold, letterSpacing: 1.4 },
   title: { marginTop: spacing.xs, color: colors.textPrimary, fontFamily: typography.fontFamily.ui.bold, fontSize: typography.size['3xl'], fontWeight: typography.weight.bold },

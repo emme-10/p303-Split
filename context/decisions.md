@@ -291,3 +291,39 @@ back up from.
 - If resuming in a NEW chat/session, point it at BRIEF.md, 
   .claude/context.md, and this decisions.md entry specifically — it's 
   a self-contained status snapshot.
+
+## 2026-09-30 — Persistent bottom tab navigation
+
+Picked up punch-list item #1 from the 2026-09-27 checkpoint: scattered
+breadcrumb links didn't read as a real mobile app and risked the rubric's
+"confusing/hard to navigate" Redo criterion.
+
+- Added `src/navigation/BottomTabBar.tsx` — a custom tab bar (no new
+  navigation library; the app already drives screens from a manual state
+  switch in `App.tsx` rather than Expo Router/react-navigation, so a
+  lightweight component kept that pattern consistent) with 4 tabs: Split
+  (home) / Calendar / Progress / Templates
+- Active Workout and Template Builder (Template Details + Add Exercises)
+  deliberately stay OFF the tab bar — they're flows entered FROM a tab
+  (Split or Templates), not destinations themselves, so they push over
+  the tab bar and hide it rather than becoming a 5th tab
+- `App.tsx` now tracks whether the current screen is one of the 4 tab
+  screens and only renders the tab bar in that case; flow screens keep
+  their existing in-flow cancel/back affordances (e.g. Template Details'
+  "‹ TEMPLATES")
+- Reused existing tokens only — active-tab indicator and label use
+  `colors.strength`/`colors.textPrimary`, matching the precedent already
+  set elsewhere (e.g. Template Library's add button) of using the
+  strength accent as the general "primary/active" UI color, not just a
+  workout-type tag; no new colors or spacing values introduced
+- Removed the now-redundant "‹ WEEKLY SPLIT" breadcrumb from Calendar and
+  Progress per the original plan, and also from Template Library — it had
+  the identical pattern/purpose (a way back to the home screen) and is
+  equally redundant now that Templates is a tab itself
+- Kept Calendar's "GO TO WEEKLY SPLIT" day-detail link and Progress's
+  empty-state "GO TO WEEKLY SPLIT" CTA — both are contextual actions
+  (assign a day / log a first workout), not breadcrumbs, so they stay
+- Verified by walking all 4 tabs plus entering/exiting Template Builder
+  in the running app: tab bar persists and highlights correctly across
+  Split/Calendar/Progress/Templates, disappears during Template Builder,
+  and cancelling returns to the correct tab
