@@ -63,7 +63,7 @@ function chartPoint(index: number, miles: number, maxMiles: number, width: numbe
 }
 
 export default function ProgressScreen({ onBack }: ProgressScreenProps) {
-  const { templates, weeklySplit, workoutLogs, replaceDemoWorkoutLogs } = useAppState();
+  const { templates, weeklySplit, weeklySplitSince, workoutLogs, replaceDemoWorkoutLogs } = useAppState();
   const [demoSeedCount, setDemoSeedCount] = useState<number | null>(null);
   const hasDemoData = workoutLogs.some((log) => log.source === 'demo');
   const [chartPlotWidth, setChartPlotWidth] = useState(0);
@@ -131,7 +131,7 @@ export default function ProgressScreen({ onBack }: ProgressScreenProps) {
   const selectedMileageWeek = selectedMileageIndex === null ? undefined : weeklyMileage[selectedMileageIndex];
   const mileageY = (miles: number) => chartBottom - (miles / yAxisMax) * (chartBottom - chartTop);
 
-  const recentDays = getRecentDayStatuses({ today, days: 14, weeklySplit, templates, workoutLogs });
+  const recentDays = getRecentDayStatuses({ today, days: 14, weeklySplit, weeklySplitSince, templates, workoutLogs });
   const consistencyDays = recentDays.filter((day) => day.status === 'logged').length;
   const currentStreak = calculateCurrentStreak(recentDays);
 

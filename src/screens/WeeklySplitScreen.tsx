@@ -25,7 +25,7 @@ const workoutStyles: Record<DayType, { accent: string; muted: string; icon: stri
 };
 
 export default function WeeklySplitScreen({ onOpenTemplates, onStartWorkout, onStartFreeform }: WeeklySplitScreenProps) {
-  const { templates, weeklySplit, workoutLogs, assignTemplate } = useAppState();
+  const { templates, weeklySplit, weeklySplitSince, workoutLogs, assignTemplate } = useAppState();
   const [selectedDay, setSelectedDay] = useState<Weekday | null>(null);
   const today = new Date();
   const todayWeekday = weekdays[(today.getDay() + 6) % 7];
@@ -45,7 +45,7 @@ export default function WeeklySplitScreen({ onOpenTemplates, onStartWorkout, onS
   const todayType = getDayType(todayAssignment);
   const todayWorkoutStyle = workoutStyles[todayType];
   const todayLabel = `TODAY · ${dayLabels[todayWeekday]} ${today.toLocaleDateString(undefined, { day: '2-digit' })}`;
-  const recentDays = getRecentDayStatuses({ today, days: 14, weeklySplit, templates, workoutLogs });
+  const recentDays = getRecentDayStatuses({ today, days: 14, weeklySplit, weeklySplitSince, templates, workoutLogs });
   const currentStreak = calculateCurrentStreak(recentDays);
   const chooseAssignment = (assignment: string) => {
     if (selectedDay) assignTemplate(selectedDay, assignment);
@@ -77,6 +77,10 @@ export default function WeeklySplitScreen({ onOpenTemplates, onStartWorkout, onS
               <Pressable accessibilityRole="button" onPress={() => onStartWorkout(todayTemplate)} style={({ pressed }) => [styles.startWorkoutButton, { backgroundColor: todayWorkoutStyle.accent }, pressed && styles.buttonPressed]}>
                 <Text style={styles.startWorkoutText}>START WORKOUT</Text>
                 <Text style={styles.startWorkoutArrow}>›</Text>
+              </Pressable>
+              <Pressable accessibilityRole="button" onPress={onStartFreeform} style={styles.freeformLink}>
+                <Text style={styles.freeformLinkText}>Start a freeform workout instead</Text>
+                <Text style={styles.freeformArrow}>›</Text>
               </Pressable>
             </>
           ) : (

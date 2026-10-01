@@ -40,7 +40,7 @@ function localDateKey(date: Date) {
   return `${year}-${month}-${day}`;
 }
 
-function getMonthCells(year: number, month: number, todayKey: string, firstDayKey: string, logsByDate: Map<string, WorkoutLog[]>, weeklySplit: Record<Weekday, string | undefined>, templateById: Map<string, { name: string; activityType: ActivityType }>): CalendarDay[] {
+function getMonthCells(year: number, month: number, todayKey: string, firstDayKey: string, logsByDate: Map<string, WorkoutLog[]>, weeklySplit: Record<Weekday, string | undefined>, weeklySplitSince: Record<Weekday, string | undefined>, templateById: Map<string, { name: string; activityType: ActivityType }>): CalendarDay[] {
   const monthStart = new Date(year, month, 1);
   const mondayOffset = (monthStart.getDay() + 6) % 7;
   const gridStart = new Date(year, month, 1 - mondayOffset);
@@ -59,6 +59,7 @@ function getMonthCells(year: number, month: number, todayKey: string, firstDayKe
       weekday,
       assignment,
       plannedType: assignedTemplate?.activityType,
+      assignmentSince: weeklySplitSince[weekday],
       logs,
     });
 
@@ -82,7 +83,7 @@ function dayLabel(date: Date) {
 }
 
 export default function CalendarScreen({ onOpenWeeklySplit }: CalendarScreenProps) {
-  const { templates, weeklySplit, workoutLogs } = useAppState();
+  const { templates, weeklySplit, weeklySplitSince, workoutLogs } = useAppState();
   const [visibleMonth, setVisibleMonth] = useState(() => {
     const today = new Date();
     return new Date(today.getFullYear(), today.getMonth(), 1);
@@ -98,7 +99,8 @@ export default function CalendarScreen({ onOpenWeeklySplit }: CalendarScreenProp
   }
   const templateById = new Map(templates.map((template) => [template.id, { name: template.name, activityType: template.activityType }]));
   const splitRecord = weeklySplit as Record<Weekday, string | undefined>;
-  const monthDays = getMonthCells(visibleMonth.getFullYear(), visibleMonth.getMonth(), todayKey, firstDayKey, logsByDate, splitRecord, templateById);
+  const splitSinceRecord = weeklySplitSince as Record<Weekday, string | undefined>;
+  const monthDays = getMonthCells(visibleMonth.getFullYear(), visibleMonth.getMonth(), todayKey, firstDayKey, logsByDate, splitRecord, splitSinceRecord, templateById);
   const monthIsEmpty = monthDays.every((day) => !day.inMonth || day.status === 'empty');
   const selectedDay = selectedDate ? monthDays.find((day) => day.dateKey === localDateKey(selectedDate)) : undefined;
 

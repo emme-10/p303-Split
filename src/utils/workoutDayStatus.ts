@@ -1,11 +1,11 @@
 import exercises from '../data/exercises.json';
-import { weekdays, type ActivityType, type SavedTemplate, type SplitAssignment, type WeeklySplit, type WorkoutLog, type Weekday } from '../types/templates';
+import { weekdays, type ActivityType, type SavedTemplate, type SplitAssignment, type WeeklySplit, type WeeklySplitSince, type WorkoutLog, type Weekday } from '../types/templates';
 
 export type WorkoutDayStatus = 'logged' | 'planned' | 'skipped' | 'rest' | 'empty';
 
 const exerciseCategories = new Map(exercises.map((exercise) => [exercise.id, exercise.category as ActivityType]));
 
-function localDateKey(date: Date) {
+export function localDateKey(date: Date) {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const day = String(date.getDate()).padStart(2, '0');
@@ -52,6 +52,7 @@ export function classifyWorkoutDay({
   weekday,
   assignment,
   plannedType,
+  assignmentSince,
   logs,
 }: {
   dateKey: string;
@@ -59,19 +60,26 @@ export function classifyWorkoutDay({
   weekday: Weekday;
   assignment: SplitAssignment | undefined;
   plannedType?: ActivityType;
+  assignmentSince?: string;
   logs: WorkoutLog[];
 }): WorkoutDayClassification {
   const loggedTypes = getLoggedWorkoutTypes(logs);
   const isPast = dateKey < todayKey;
+  // An assignment only applies to dates on/after the day it was set — otherwise a
+  // weekday assignment made today would retroactively mark prior weeks as skipped/rest.
+  const assignmentIsActive = assignment !== undefined && (!assignmentSince || dateKey >= assignmentSince);
+  const effectiveAssignment = assignmentIsActive ? assignment : undefined;
+  const effectivePlannedType = assignmentIsActive ? plannedType : undefined;
   let status: WorkoutDayStatus = 'empty';
 
   if (logs.length > 0) status = 'logged';
-  else if (assignment === 'rest') status = 'rest';
-  else if (plannedType && !isPast) status = 'planned';
-  else if (plannedType && isPast) status = 'skipped';
+  else if (effectiveAssignment === 'rest') status = 'rest';
+  else if (effectivePlannedType && !isPast) status = 'planned';
+  else if (effectivePlannedType && isPast) status = 'skipped';
 
   return { status, loggedTypes };
 }
+
 
 export type RecentDayStatus = { dateKey: string; status: WorkoutDayStatus };
 
@@ -79,12 +87,14 @@ export function getRecentDayStatuses({
   today,
   days,
   weeklySplit,
+  weeklySplitSince,
   templates,
   workoutLogs,
 }: {
   today: Date;
   days: number;
   weeklySplit: WeeklySplit;
+  weeklySplitSince?: WeeklySplitSince;
   templates: SavedTemplate[];
   workoutLogs: WorkoutLog[];
 }): RecentDayStatus[] {
@@ -111,6 +121,7 @@ export function getRecentDayStatuses({
       weekday,
       assignment,
       plannedType: template?.activityType,
+      assignmentSince: weeklySplitSince?.[weekday],
       logs: logsByDate.get(dateKey) ?? [],
     });
     return { dateKey, status: classification.status };

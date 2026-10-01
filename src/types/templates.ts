@@ -53,5 +53,8 @@ export const weekdays = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday',
 export type Weekday = (typeof weekdays)[number];
 export type SplitAssignment = string | 'rest';
 export type WeeklySplit = Partial<Record<Weekday, SplitAssignment>>;
+// Local dateKey (YYYY-MM-DD) each weekday's current assignment took effect — lets past
+// dates before that point be excluded from "planned"/"skipped"/"rest" classification.
+export type WeeklySplitSince = Partial<Record<Weekday, string>>;
 
 export const createEmptyWeeklySplit = (): WeeklySplit => ({});

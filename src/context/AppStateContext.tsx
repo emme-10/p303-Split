@@ -1,7 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 
-import { createEmptyWeeklySplit, weekdays, type SavedTemplate, type SplitAssignment, type WeeklySplit, type Weekday, type WorkoutLog } from '../types/templates';
+import { createEmptyWeeklySplit, weekdays, type SavedTemplate, type SplitAssignment, type WeeklySplit, type WeeklySplitSince, type Weekday, type WorkoutLog } from '../types/templates';
+import { localDateKey } from '../utils/workoutDayStatus';
 
 const STORAGE_KEY = '@splitlog/app-state/v1';
 
@@ -9,6 +10,7 @@ export type AppSnapshot = {
   version: 1;
   templates: SavedTemplate[];
   weeklySplit: WeeklySplit;
+  weeklySplitSince: WeeklySplitSince;
   workoutLogs: WorkoutLog[];
 };
 
@@ -25,6 +27,7 @@ const emptySnapshot = (): AppSnapshot => ({
   version: 1,
   templates: [],
   weeklySplit: createEmptyWeeklySplit(),
+  weeklySplitSince: {},
   workoutLogs: [],
 });
 
@@ -37,6 +40,7 @@ function parseSnapshot(rawValue: string | null): AppSnapshot {
   if (!parsed || typeof parsed !== 'object') return emptySnapshot();
   const stored = parsed as Partial<AppSnapshot>;
   const weeklySplit: WeeklySplit = {};
+  const weeklySplitSince: WeeklySplitSince = {};
   const isLegacyEmptyDefault = stored.version === 1
     && Array.isArray(stored.templates)
     && stored.templates.length === 0
@@ -51,10 +55,18 @@ function parseSnapshot(rawValue: string | null): AppSnapshot {
     }
   }
 
+  if (stored.weeklySplitSince && typeof stored.weeklySplitSince === 'object') {
+    for (const day of weekdays) {
+      const since = stored.weeklySplitSince[day];
+      if (typeof since === 'string') weeklySplitSince[day] = since;
+    }
+  }
+
   return {
     version: 1,
     templates: Array.isArray(stored.templates) ? stored.templates : [],
     weeklySplit,
+    weeklySplitSince,
     workoutLogs: Array.isArray(stored.workoutLogs) ? stored.workoutLogs : [],
   };
 }
@@ -99,14 +111,23 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
         ? current.templates.map((saved) => saved.id === template.id ? template : saved)
         : [...current.templates, template],
     })),
-    deleteTemplate: (templateId) => setSnapshot((current) => ({
-      ...current,
-      templates: current.templates.filter((template) => template.id !== templateId),
-      weeklySplit: Object.fromEntries(weekdays.map((day) => [day, current.weeklySplit[day] === templateId ? 'rest' : current.weeklySplit[day]])) as WeeklySplit,
-    })),
+    deleteTemplate: (templateId) => setSnapshot((current) => {
+      const today = localDateKey(new Date());
+      const affectedDays = weekdays.filter((day) => current.weeklySplit[day] === templateId);
+      return {
+        ...current,
+        templates: current.templates.filter((template) => template.id !== templateId),
+        weeklySplit: Object.fromEntries(weekdays.map((day) => [day, affectedDays.includes(day) ? 'rest' : current.weeklySplit[day]])) as WeeklySplit,
+        weeklySplitSince: affectedDays.length === 0 ? current.weeklySplitSince : {
+          ...current.weeklySplitSince,
+          ...Object.fromEntries(affectedDays.map((day) => [day, today])),
+        },
+      };
+    }),
     assignTemplate: (day: Weekday, assignment: SplitAssignment) => setSnapshot((current) => ({
       ...current,
       weeklySplit: { ...current.weeklySplit, [day]: assignment },
+      weeklySplitSince: { ...current.weeklySplitSince, [day]: localDateKey(new Date()) },
     })),
     addWorkoutLog: (log) => setSnapshot((current) => ({ ...current, workoutLogs: [...current.workoutLogs, log] })),
     replaceDemoWorkoutLogs: (logs) => setSnapshot((current) => ({

@@ -114,3 +114,18 @@ that partially answers the data-gap question above — worth checking
 before solving this twice. Prototype the visual encoding separately 
 from Calendar itself (e.g. on a single sample circle) before committing 
 to it across the whole month grid.
+
+## No way to backdate a workout log
+**What:** Active Workout (template-driven and freeform) always 
+timestamps a session to "now" — there's no date picker or way to log a 
+workout against a past date, e.g. correcting a missed entry after the 
+fact or backdating for testing.
+**Why deferred:** Known limitation surfaced during end-to-end flow 
+testing, not required for this submission — the seeded demo data covers 
+historical-looking Progress/Calendar views without needing real 
+backdated entries.
+**If picked up later:** would need a date (and likely time) field added 
+to the Active Workout finish flow, defaulting to now, with validation 
+against future dates; `WorkoutLog.date`/`startedAt`/`completedAt` 
+already exist as ISO strings so the data model mostly supports it — 
+the gap is purely in the UI entry point.

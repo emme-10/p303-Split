@@ -355,3 +355,46 @@ real user data (no templates, no logged workouts, nothing seeded).
 - No new components introduced; both fixes reused existing `section`/
   text-style conventions already established on their respective screens
 
+## 2026-09-30 — Full end-to-end flow test + two bug fixes
+
+Ran punch-list item #4: create template → assign → log template workout
+→ log freeform workout → verify Calendar → verify Progress → reload.
+Most of the chain worked correctly (template creation, assignment,
+logging, chart/streak math, and AsyncStorage persistence all checked
+out). Found and fixed two real issues along the way:
+
+**Bug: retroactive "Skipped"/"Rest" on historical Calendar days.** Weekly
+Split assignments are recurring by weekday with no notion of *when* an
+assignment took effect, so Calendar's classifier read "is this weekday
+assigned" for every date in view — assigning Monday to a template today
+instantly marked every past Monday as "Skipped," including dates weeks
+before the template existed.
+- Added `WeeklySplitSince` (`src/types/templates.ts`): a per-weekday
+  dateKey recording when that weekday's current assignment was last set
+- `AppStateContext.assignTemplate` now stamps `weeklySplitSince[day]` to
+  today on every change; `deleteTemplate`'s fallback-to-rest does the
+  same for affected days, since that's also an effective assignment
+  change. Existing persisted data with no stamp falls back to the old
+  (unrestricted) behavior rather than fabricating history — only
+  assignments made after this fix get the new protection
+- `classifyWorkoutDay` (`src/utils/workoutDayStatus.ts`) gained an
+  `assignmentSince` param: an assignment is only treated as active for a
+  given date if that date is on/after its since-date; otherwise the day
+  falls back to its un-assigned state ("No plan") instead of "Skipped"
+  or "Rest." `getRecentDayStatuses` and Calendar's `getMonthCells` both
+  thread the per-weekday since-date through
+- Verified: reassigning Monday and Wednesday today immediately turned
+  every prior occurrence of those weekdays (Aug 31 → Sep 28) from
+  "Skipped"/"Rest" into "No plan" in Calendar, while future occurrences
+  (Oct 5, Oct 7) correctly still show "Planned"
+
+**UX gap: no freeform entry point once today has an assigned template.**
+The Today card's "Start a freeform workout instead" link only rendered
+in the Rest-day branch; once a template was assigned, there was no way
+to start a freeform session without first unassigning the day.
+- Added the same freeform link as a secondary action in the
+  template-assigned branch too, alongside (not replacing) "START
+  WORKOUT" — reuses the existing `freeformLink` style, no new component
+- Verified: freeform is now reachable both when today is Rest and when
+  today has a template assigned, without changing the day's assignment
+
