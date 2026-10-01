@@ -122,6 +122,7 @@ export default function ProgressScreen({ onBack }: ProgressScreenProps) {
     .sort((a, b) => b.avgSets - a.avgSets)
     .slice(0, 8);
   const setsScaleMax = Math.max(setsGuidelineMax, ...muscleSets.map((item) => item.avgSets));
+  const hasMileageData = weeklyMileage.some((week) => week.miles > 0);
   const maxMiles = Math.max(1, ...weeklyMileage.map((item) => item.miles));
   const yAxisMax = Math.max(10, Math.ceil(maxMiles / 10) * 10);
   const yAxisTicks = Array.from({ length: yAxisMax / 10 + 1 }, (_, index) => yAxisMax - index * 10);
@@ -184,45 +185,47 @@ export default function ProgressScreen({ onBack }: ProgressScreenProps) {
 
         <View style={styles.section}>
           <View style={styles.sectionHeader}><Text style={styles.sectionTitle}>Weekly running mileage</Text><Text style={styles.windowLabel}>LAST 8 WEEKS</Text></View>
-          <View style={styles.chartAxisLabelRow}><Text style={styles.chartAxisLabel}>MILES / WEEK</Text></View>
-          <View style={styles.chartPlotRow}>
-            <View style={styles.chartYAxis}>
-              {yAxisTicks.map((tick) => <Text key={tick} style={[styles.chartYAxisLabel, { top: mileageY(tick) - typography.size.xs / 2 }]}>{tick}</Text>)}
+          {hasMileageData ? <>
+            <View style={styles.chartAxisLabelRow}><Text style={styles.chartAxisLabel}>MILES / WEEK</Text></View>
+            <View style={styles.chartPlotRow}>
+              <View style={styles.chartYAxis}>
+                {yAxisTicks.map((tick) => <Text key={tick} style={[styles.chartYAxisLabel, { top: mileageY(tick) - typography.size.xs / 2 }]}>{tick}</Text>)}
+              </View>
+              <View onLayout={(event) => setChartPlotWidth(event.nativeEvent.layout.width)} style={styles.chartPlot}>
+                <Pressable accessibilityRole="button" accessibilityLabel="Dismiss mileage detail" onPress={() => setSelectedMileageIndex(null)} style={styles.chartPlotDismiss} />
+                {chartPlotWidth > 0 && <Svg style={{ pointerEvents: 'none' }} width="100%" height="100%" viewBox={`0 0 ${chartPlotWidth} ${chartPlotHeight}`}>
+                  {yAxisTicks.map((tick) => <Line key={tick} x1={0} y1={mileageY(tick)} x2={chartPlotWidth} y2={mileageY(tick)} stroke={colors.border} strokeWidth={1} />)}
+                  <Polyline points={pointString} fill="none" stroke={colors.cardio} strokeWidth={3} strokeLinejoin="round" strokeLinecap="round" />
+                  {points.map((point, index) => <Circle key={index} cx={point.x} cy={point.y} r={spacing.xs} fill={colors.cardio} />)}
+                </Svg>}
+                {chartPlotWidth > 0 && points.map((point, index) => <Pressable
+                  key={weeklyMileage[index].label}
+                  accessibilityRole="button"
+                  accessibilityLabel={`${weeklyMileage[index].label} week: ${formatMileage(weeklyMileage[index].miles)} miles`}
+                  accessibilityState={{ selected: selectedMileageIndex === index }}
+                  onPress={() => setSelectedMileageIndex((current) => current === index ? null : index)}
+                  style={[styles.chartPointTarget, { left: point.x - (spacing.lg + spacing.sm) / 2, top: point.y - (spacing.lg + spacing.sm) / 2 }]}
+                />)}
+              </View>
             </View>
-            <View onLayout={(event) => setChartPlotWidth(event.nativeEvent.layout.width)} style={styles.chartPlot}>
-              <Pressable accessibilityRole="button" accessibilityLabel="Dismiss mileage detail" onPress={() => setSelectedMileageIndex(null)} style={styles.chartPlotDismiss} />
-              {chartPlotWidth > 0 && <Svg style={{ pointerEvents: 'none' }} width="100%" height="100%" viewBox={`0 0 ${chartPlotWidth} ${chartPlotHeight}`}>
-                {yAxisTicks.map((tick) => <Line key={tick} x1={0} y1={mileageY(tick)} x2={chartPlotWidth} y2={mileageY(tick)} stroke={colors.border} strokeWidth={1} />)}
-                <Polyline points={pointString} fill="none" stroke={colors.cardio} strokeWidth={3} strokeLinejoin="round" strokeLinecap="round" />
-                {points.map((point, index) => <Circle key={index} cx={point.x} cy={point.y} r={spacing.xs} fill={colors.cardio} />)}
-              </Svg>}
-              {chartPlotWidth > 0 && points.map((point, index) => <Pressable
-                key={weeklyMileage[index].label}
-                accessibilityRole="button"
-                accessibilityLabel={`${weeklyMileage[index].label} week: ${formatMileage(weeklyMileage[index].miles)} miles`}
-                accessibilityState={{ selected: selectedMileageIndex === index }}
-                onPress={() => setSelectedMileageIndex((current) => current === index ? null : index)}
-                style={[styles.chartPointTarget, { left: point.x - (spacing.lg + spacing.sm) / 2, top: point.y - (spacing.lg + spacing.sm) / 2 }]}
-              />)}
+            <View style={styles.chartLabels}>
+              {weeklyMileage.map((week) => <View key={week.label} style={styles.chartTick}>
+                <Text style={styles.chartWeekLabel}>{week.label}</Text>
+              </View>)}
             </View>
-          </View>
-          <View style={styles.chartLabels}>
-            {weeklyMileage.map((week) => <View key={week.label} style={styles.chartTick}>
-              <Text style={styles.chartWeekLabel}>{week.label}</Text>
-            </View>)}
-          </View>
-          {selectedMileageWeek && <View style={styles.mileageDetailSheet}>
-            <View style={styles.mileageDetailHeader}>
-              <View><Text style={styles.mileageDetailTitle}>Week of {selectedMileageWeek.label}</Text><Text style={styles.mileageDetailTotal}>{formatMileage(selectedMileageWeek.miles)} MILES</Text></View>
-              <Pressable accessibilityRole="button" accessibilityLabel="Close mileage details" onPress={() => setSelectedMileageIndex(null)} style={styles.sheetCloseButton}><Text style={styles.sheetCloseText}>×</Text></Pressable>
-            </View>
-            <View style={styles.mileageSessionList}>
-              {selectedMileageWeek.sessions.length ? selectedMileageWeek.sessions.map((session, index) => <View key={`${session.date.toISOString()}-${session.exerciseName}-${index}`} style={styles.mileageSessionRow}>
-                <View style={styles.mileageSessionText}><Text style={styles.mileageSessionName}>{session.exerciseName}</Text><Text style={styles.mileageSessionDate}>{session.date.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}</Text></View>
-                <Text style={styles.mileageSessionDistance}>{formatMileage(session.distance)} mi</Text>
-              </View>) : <Text style={styles.mileageNoSessions}>No cardio sessions logged this week.</Text>}
-            </View>
-          </View>}
+            {selectedMileageWeek && <View style={styles.mileageDetailSheet}>
+              <View style={styles.mileageDetailHeader}>
+                <View><Text style={styles.mileageDetailTitle}>Week of {selectedMileageWeek.label}</Text><Text style={styles.mileageDetailTotal}>{formatMileage(selectedMileageWeek.miles)} MILES</Text></View>
+                <Pressable accessibilityRole="button" accessibilityLabel="Close mileage details" onPress={() => setSelectedMileageIndex(null)} style={styles.sheetCloseButton}><Text style={styles.sheetCloseText}>×</Text></Pressable>
+              </View>
+              <View style={styles.mileageSessionList}>
+                {selectedMileageWeek.sessions.length ? selectedMileageWeek.sessions.map((session, index) => <View key={`${session.date.toISOString()}-${session.exerciseName}-${index}`} style={styles.mileageSessionRow}>
+                  <View style={styles.mileageSessionText}><Text style={styles.mileageSessionName}>{session.exerciseName}</Text><Text style={styles.mileageSessionDate}>{session.date.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}</Text></View>
+                  <Text style={styles.mileageSessionDistance}>{formatMileage(session.distance)} mi</Text>
+                </View>) : <Text style={styles.mileageNoSessions}>No cardio sessions logged this week.</Text>}
+              </View>
+            </View>}
+          </> : <Text style={styles.sectionEmpty}>No cardio distance logged in this window.</Text>}
         </View>
 
         <View style={styles.section}>

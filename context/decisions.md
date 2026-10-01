@@ -327,3 +327,31 @@ breadcrumb links didn't read as a real mobile app and risked the rubric's
   in the running app: tab bar persists and highlights correctly across
   Split/Calendar/Progress/Templates, disappears during Template Builder,
   and cancelling returns to the correct tab
+
+## 2026-09-30 — Empty-state pass across all 5 screens
+
+Picked up punch-list item #3: audited all 5 screens against BRIEF.md's
+"empty states are explicit, not blank screens" commitment, assuming zero
+real user data (no templates, no logged workouts, nothing seeded).
+
+- Already handled, no changes needed: Weekly Split (Rest-day today card,
+  freeform fallback, "no templates yet" day-assignment picker), Calendar
+  ("Nothing on the calendar yet" when the whole visible month is empty),
+  Templates (no-templates empty state with an Add Template CTA), and
+  Template Builder's Add Exercises step (disabled Save + "Add at least
+  one exercise..." hint) — all already matched the brief
+- Progress's top-level zero-workouts state was already handled, but its
+  per-chart degradation was not: the weekly mileage line chart had no
+  empty-state guard, so a window with workouts logged but zero cardio
+  distance would have rendered a flat, unexplained line at the chart
+  floor. Added a `hasMileageData` check that swaps the chart for a
+  "No cardio distance logged in this window." message, mirroring the
+  sets-per-muscle-group section's existing empty-text pattern
+- Active Workout's freeform flow (0 exercises at session start) read as
+  a near-blank screen below the header — added an explicit
+  "No exercises in this session yet — add one to get started." hint
+  above the Add Exercise button, reusing the same textSecondary/regular
+  treatment as other empty-state copy in the app
+- No new components introduced; both fixes reused existing `section`/
+  text-style conventions already established on their respective screens
+
