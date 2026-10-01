@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, SafeAreaView, StyleSheet, Text, View } from 'react-native';
 
 import { colors, radius, spacing, typography } from '../theme';
 
@@ -18,7 +18,7 @@ const tabs: { key: TabKey; label: string }[] = [
 
 export default function BottomTabBar({ active, onChange }: BottomTabBarProps) {
   return (
-    <View style={styles.bar}>
+    <SafeAreaView style={styles.bar}>
       {tabs.map((tab) => {
         const isActive = tab.key === active;
         return (
@@ -34,13 +34,13 @@ export default function BottomTabBar({ active, onChange }: BottomTabBarProps) {
           </Pressable>
         );
       })}
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   bar: { flexDirection: 'row', borderTopWidth: 1, borderTopColor: colors.border, backgroundColor: colors.surface },
-  tab: { flex: 1, minHeight: spacing['2xl'], alignItems: 'center', justifyContent: 'center', gap: spacing.xs, paddingVertical: spacing.sm },
+  tab: { flex: 1, minHeight: spacing['2xl'] + spacing.sm, alignItems: 'center', justifyContent: 'center', gap: spacing.xs, paddingVertical: spacing.md },
   indicator: { width: spacing.md, height: 3, borderRadius: radius.full, backgroundColor: 'transparent' },
   indicatorActive: { backgroundColor: colors.strength },
   label: { color: colors.textSecondary, fontFamily: typography.fontFamily.ui.bold, fontSize: typography.size.xs, fontWeight: typography.weight.bold, letterSpacing: 0.8 },

@@ -92,7 +92,7 @@ function AppNavigation() {
   return (
     <View style={styles.container}>
       <View style={styles.screenArea}>
-        {screen === 'split' && <WeeklySplitScreen onOpenCalendar={() => setScreen('calendar')} onOpenProgress={() => setScreen('progress')} onOpenTemplates={() => setScreen('library')} onStartWorkout={startTemplateWorkout} onStartFreeform={startFreeformWorkout} />}
+        {screen === 'split' && <WeeklySplitScreen onOpenTemplates={() => setScreen('library')} onStartWorkout={startTemplateWorkout} onStartFreeform={startFreeformWorkout} />}
         {screen === 'calendar' && <CalendarScreen onOpenWeeklySplit={() => setScreen('split')} />}
         {screen === 'progress' && <ProgressScreen onBack={() => setScreen('split')} />}
         {screen === 'library' && <TemplateLibraryScreen onAddTemplate={startNewTemplate} onEditTemplate={startEditingTemplate} />}

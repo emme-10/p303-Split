@@ -6,8 +6,8 @@ import exercises from '../data/exercises.json';
 import { useAppState } from '../context/AppStateContext';
 import { colors, radius, spacing, typography } from '../theme';
 import { generateDemoProgressLogs } from '../utils/demoProgressData';
-import { classifyWorkoutDay } from '../utils/workoutDayStatus';
-import { weekdays, type Weekday, type WorkoutLog } from '../types/templates';
+import { calculateCurrentStreak, getRecentDayStatuses } from '../utils/workoutDayStatus';
+import type { WorkoutLog } from '../types/templates';
 
 type ProgressScreenProps = { onBack: () => void };
 type CardioSession = { date: Date; exerciseName: string; distance: number };
@@ -33,10 +33,6 @@ function mondayFor(date: Date) {
   monday.setHours(0, 0, 0, 0);
   monday.setDate(monday.getDate() - ((monday.getDay() + 6) % 7));
   return monday;
-}
-
-function weekdayFor(date: Date): Weekday {
-  return weekdays[(date.getDay() + 6) % 7];
 }
 
 function loggedDate(log: WorkoutLog) {
@@ -134,30 +130,9 @@ export default function ProgressScreen({ onBack }: ProgressScreenProps) {
   const selectedMileageWeek = selectedMileageIndex === null ? undefined : weeklyMileage[selectedMileageIndex];
   const mileageY = (miles: number) => chartBottom - (miles / yAxisMax) * (chartBottom - chartTop);
 
-  const recentDays = Array.from({ length: 14 }, (_, index) => {
-    const date = new Date(today);
-    date.setHours(0, 0, 0, 0);
-    date.setDate(today.getDate() - (13 - index));
-    const dateKey = localDateKey(date);
-    const weekday = weekdayFor(date);
-    const assignment = weeklySplit[weekday];
-    const template = assignment && assignment !== 'rest' ? templateById.get(assignment) : undefined;
-    const classification = classifyWorkoutDay({
-      dateKey,
-      todayKey,
-      weekday,
-      assignment,
-      plannedType: template?.activityType,
-      logs: logsByDate.get(dateKey) ?? [],
-    });
-    return { dateKey, status: classification.status };
-  });
+  const recentDays = getRecentDayStatuses({ today, days: 14, weeklySplit, templates, workoutLogs });
   const consistencyDays = recentDays.filter((day) => day.status === 'logged').length;
-  let currentStreak = 0;
-  for (const day of [...recentDays].reverse()) {
-    if (day.status === 'skipped') break;
-    if (day.status === 'logged') currentStreak += 1;
-  }
+  const currentStreak = calculateCurrentStreak(recentDays);
 
   const seedDemoData = () => {
     const demoLogs = generateDemoProgressLogs(templates, weeklySplit, today, workoutLogs);
